@@ -1,8 +1,13 @@
 # Dependency directories
 node_modules/
+.idea/
 
 # wechat environment variables file
 wechat.json
 
 *.log
 npm-debug.log*
+
+
+# wechat oauth file
+public/MP_verify_pRhCnMcF4OrscpHp.txt
