@@ -1,0 +1,8 @@
+# Dependency directories
+node_modules/
+
+# wechat environment variables file
+wechat.json
+
+*.log
+npm-debug.log*
