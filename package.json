@@ -15,6 +15,7 @@
     "mongoose": "^4.8.6",
     "morgan": "~1.7.0",
     "serve-favicon": "~2.3.2",
+    "swagger": "^0.7.5",
     "wechat-oauth": "^1.2.1"
   }
 }
