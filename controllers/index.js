@@ -1,6 +1,6 @@
 var express = require('express');
 var crypto = require('crypto');
-var wechatParams = require('../wechat.json')
+var wechatParams = require('../configs/wechat.json')
 
 module.exports = {
     checkSignature: function (req, res, next) {

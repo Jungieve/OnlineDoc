@@ -1,9 +1,8 @@
 # Dependency directories
 node_modules/
+configs/
 .idea/
 
-# wechat environment variables file
-wechat.json
 
 *.log
 npm-debug.log*

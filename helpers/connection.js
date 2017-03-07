@@ -2,7 +2,8 @@
  * Created by congzihan on 16/12/3.
  */
 var  mongoose = require('mongoose');
-var db = 'mongodb://localhost:27017';
+mongoose.Promise = global.Promise;
+var db = 'mongodb://localhost:27017/onlineDoc';
 mongoose.connect(db);
 
 //log message to the console
@@ -22,3 +23,5 @@ process.on('SIGINT',function () {
         process.exit(0);
     });
 });
+
+require('../models/user');
