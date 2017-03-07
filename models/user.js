@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var UserItem = new Schema({
-    openid: String,
+    openid: {type:String,unique:true},
     nickname: String,
     headimgurl: String
 });

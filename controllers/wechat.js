@@ -13,7 +13,7 @@ module.exports = {
      * @param next
      */
     getAuthorizedInfo: function (req, res, next) {
-        var redirectUrl = encodeURI('http://'+domainConfig.domain+'/wechat/authorizeCallback');
+        var redirectUrl = encodeURI('http://'+domainConfig.domain+'/wechat/callback');
         var url = client.getAuthorizeURL(redirectUrl, 'userinfo', 'snsapi_userinfo');
         res.redirect(url)
     },
@@ -24,7 +24,7 @@ module.exports = {
      * @param next
      */
     getUserInfo: function (req, res, next) {
-        var redirectUrl = encodeURI('http://'+domainConfig.domain+'/wechat/authorizeCallback');
+        var redirectUrl = encodeURI('http://'+domainConfig.domain+'/wechat/callback');
         var url = client.getAuthorizeURL(redirectUrl, 'base', 'snsapi_base');
         res.redirect(url)
     },
@@ -55,9 +55,6 @@ module.exports = {
                             console.log('error: ' + err)
                             var oauth_user = result;
                             result = new userModel(oauth_user);
-                            result.openid = oauth_user.openid;
-                            result.username = oauth_user.nickname;
-                            result.headimgurl = oauth_user.headimgurl;
                             result.save(function (err, result) {
                                 if (err) {
                                     console.log('User保存错误 ....');
