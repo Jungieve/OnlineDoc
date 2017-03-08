@@ -10,7 +10,8 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var wechat = require('./routes/wechat')
-var qiniu = require('./routes/qiniu')
+var file = require('./routes/file')
+var user = require('./routes/user')
 var app = express();
 
 // view engine setup
@@ -26,7 +27,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/wechat', wechat);
-app.use('/qiniu',qiniu);
+app.use('/files', file);
+app.use('/users', user);
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

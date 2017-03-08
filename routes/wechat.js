@@ -5,11 +5,11 @@ var oauthController = require('../controllers/wechat');
 /**
  * 微信授权并获取用户信息
  */
-router.get('/authorize/info', oauthController.getAuthorizedInfo);
+router.get('/authorized/userinfo', oauthController.getAuthorizedUserInfo);
 /**
  * 静默授权并获取用户信息（可能部分）
  */
-router.get('/info', oauthController.getUserInfo);
+router.get('/authorized/base', oauthController.getAuthorizedBase);
 /**
  * 微信回调方法
  */

@@ -12,7 +12,7 @@ module.exports = {
      * @param res
      * @param next
      */
-    getAuthorizedInfo: function (req, res, next) {
+    getAuthorizedUserInfo: function (req, res, next) {
         var redirectUrl = encodeURI('http://'+domainConfig.domain+'/wechat/callback');
         var url = client.getAuthorizeURL(redirectUrl, 'userinfo', 'snsapi_userinfo');
         res.redirect(url)
@@ -23,7 +23,7 @@ module.exports = {
      * @param res
      * @param next
      */
-    getUserInfo: function (req, res, next) {
+    getAuthorizedBase: function (req, res, next) {
         var redirectUrl = encodeURI('http://'+domainConfig.domain+'/wechat/callback');
         var url = client.getAuthorizeURL(redirectUrl, 'base', 'snsapi_base');
         res.redirect(url)
