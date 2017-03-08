@@ -23,7 +23,7 @@ module.exports = {
         putPolicy.callbackUrl = 'http://' + domainConfig.domain + '/files/upload/callback';
         putPolicy.callbackBody = 'filename=$(fname)&filesize=$(fsize)&fileType=$(mimeType)' +
             '&bucket=$(bucket)&key=$(key)' +
-            '&userid=$(x:userid)';
+            '&userid=$(x:userid)&note=$(x:note)';
         res.json(({token: putPolicy.token()}))
     },
     /**

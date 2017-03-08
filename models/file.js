@@ -7,6 +7,7 @@ var FileItem = new Schema({
     fileType: String,
     bucket: String,
     userid: String,
+    note: String,
     create_at: {type:Date, default:function(){return +new Date() + 8*60*60*1000}}
 });
 
