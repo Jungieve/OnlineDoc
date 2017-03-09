@@ -10,7 +10,7 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var wechat = require('./routes/wechat')
-var file = require('./routes/file')
+var file = require('./routes/qiniu')
 var user = require('./routes/user')
 var app = express();
 
@@ -27,7 +27,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/wechat', wechat);
-app.use('/files', file);
+app.use('/qiniu', file);
 app.use('/users', user);
 
 
