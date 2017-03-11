@@ -12,6 +12,7 @@ var index = require('./routes/index');
 var wechat = require('./routes/wechat')
 var file = require('./routes/qiniu')
 var user = require('./routes/user')
+var qrcode = require('./routes/qrcode')
 var app = express();
 
 // view engine setup
@@ -29,8 +30,16 @@ app.use('/', index);
 app.use('/wechat', wechat);
 app.use('/qiniu', file);
 app.use('/users', user);
+app.use('/qrcodes', qrcode);
 
-
+app.all('*', function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+    res.header("X-Powered-By", ' 3.2.1')
+    res.header("Content-Type", "application/json;charset=utf-8");
+    next();
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

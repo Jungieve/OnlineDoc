@@ -16,7 +16,7 @@ module.exports = {
         var pageSize = parseInt(req.query.pageSize);
         dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', {userid: openid}, {}, function (error, $page) {
             if (error)
-                console.log(error)
+                res.json(error)
             else
                 res.json($page)
         })
@@ -33,9 +33,10 @@ module.exports = {
         console.log("当前文件key值:" + key)
         var criteria = {key: key, userid: userid}; // 查询条件
         fileModel.findOne(criteria, function (err, file) {
-            if (err || file == null || file == '') {
-                console.log("未找到文件:") + err;
-                res.status(404).end();
+            if (err)
+                res.json(err)
+            else if (file == null || file == '') {
+                res.status(404).end()
             }
             else {
                 res.json(file)
@@ -56,11 +57,13 @@ module.exports = {
             if (!err) {
                 var criteria = {key: key, userid: userid}; // 查询条件
                 fileModel.findOneAndRemove(criteria, function (err, file) {
-                    if (err || file == null || file == '') {
+                    if (err)
+                        res.json(err);
+                    else if (file == null || file == '') {
                         res.status(204).end();
                     }
                     else {
-                        res.status(200).json(file).end();
+                        res.status(204).json(file).end();
                     }
                 })
             } else {
