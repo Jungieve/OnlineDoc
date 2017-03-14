@@ -1,8 +1,10 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var qiniu = require("qiniu");
-var qiniuConfig = require('../configs/qiniu.json')
+var http = require("http");
+var qiniuSignHelper = require('../helpers/qiniuSign')
 var domainConfig = require('../configs/domain.json')
+var qiniuConfig = require('../configs/qiniu.json')
 var fileModel = mongoose.model('File');
 //需要填写你的 Access Key 和 Secret Key
 qiniu.conf.ACCESS_KEY = qiniuConfig.accessKey;
@@ -56,6 +58,52 @@ module.exports = {
 
     },
 
+    /**
+     * 七牛持久化文件流程
+     * @param req
+     * @param res
+     * @param next
+     */
+    persistentFile: function (req, res, next) {
+        var key = req.params.key;
+        var fileType = req.query.type;
+        var fops = "yifangyun_preview/v2/ext=" + fileType;
+        var notifyURL = domainConfig.domain + "/qiniu/persistent/" + key;
+        opts = {
+            notifyURL: notifyURL
+        };
+        var PFOP = qiniu.fop.pfop(bucket, key, fops, opts, function (err, ret) {
+            if (!err) {
+                // 上传成功， 处理返回值
+                res.json({persistentId: ret.persistentId});
+            } else {
+                // 上传失败， 处理返回代码
+                res.json(err);
+            }
+        });
+    },
 
+    /**
+     * 七牛持久化回调函数
+     * @param req
+     * @param res
+     * @param next
+     */
+    persistentFileCallback: function (req, res, next) {
+        console.log(req.body)
+        var items = req.body.items;
+        var code = items[0].code;
+        var pdfKey = items[0].key;
+        if (code == 0) {
+            query = {key: req.body.inputKey};
+            console.log(query)
+            fileModel.findOneAndUpdate(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, result) {
+                if (err)
+                    console.log(err)
+                else console.log(result)
+            })
+        }
+        res.end();
+    }
 }
 

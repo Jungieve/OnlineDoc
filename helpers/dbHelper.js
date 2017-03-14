@@ -35,7 +35,6 @@ var pageQuery = function (page, pageSize, Model, populate, queryParams, sortPara
             });
         }
     }, function (err, results) {
-        console.log(err)
         var count = results.count;
         $page.pageCount = (count - 1) / pageSize + 1;
         $page.results = results.records;

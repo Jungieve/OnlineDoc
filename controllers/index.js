@@ -12,8 +12,6 @@ module.exports = {
             console.log(message)
             res.reply("你的微信id为" + message.FromUserName + "进行授权登录");
             // TODO
-        }).location(function (message, req, res, next) {
-            // TODO
         }).middlewarify()
 
 }

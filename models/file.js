@@ -8,6 +8,8 @@ var FileItem = new Schema({
     bucket: String,
     userid: String,
     note: String,
+    pdfKey: String,
+    code: Number,
     create_at: {type:Date, default:function(){return +new Date() + 8*60*60*1000}}
 });
 

@@ -14,7 +14,7 @@ module.exports = {
         var openid = req.params.openid;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', {userid: openid}, {}, function (error, $page) {
+        dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', {userid: openid, code: 0}, {}, function (error, $page) {
             if (error)
                 res.json(error)
             else
@@ -22,7 +22,7 @@ module.exports = {
         })
     },
     /**
-     * 从数据库中获取文件信息
+     * 从数据库中获取文件信息（包括转换未成功）
      * @param req
      * @param res
      * @param next
@@ -53,24 +53,18 @@ module.exports = {
         var client = new qiniu.rs.Client();
         var userid = req.params.openid;
         var key = req.params.key;
-        client.remove(bucket, key, function (err, result) {
-            if (!err) {
-                var criteria = {key: key, userid: userid}; // 查询条件
-                fileModel.findOneAndRemove(criteria, function (err, file) {
-                    if (err)
-                        res.json(err);
-                    else if (file == null || file == '') {
-                        res.status(204).end();
-                    }
-                    else {
-                        res.status(204).json(file).end();
-                    }
-                })
-            } else {
+
+        var criteria = {key: key, userid: userid}; // 查询条件
+        fileModel.findOneAndRemove(criteria, function (err, file) {
+            if (err)
                 res.json(err);
+            else if (file == null || file == '') {
+                res.status(204).end();
             }
-        });
-        res.status(404);
-    },
+            else {
+                res.json(file).end();
+            }
+        })
+    }
 
 }
