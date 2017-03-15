@@ -2,7 +2,6 @@ var express = require('express');
 var mongoose = require('mongoose');
 var qiniu = require("qiniu");
 var http = require("http");
-var qiniuSignHelper = require('../helpers/qiniuSign')
 var domainConfig = require('../configs/domain.json')
 var qiniuConfig = require('../configs/qiniu.json')
 var fileModel = mongoose.model('File');
