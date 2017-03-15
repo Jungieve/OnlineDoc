@@ -10,6 +10,7 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var wechat = require('./routes/wechat')
+var comment = require('./routes/comment')
 var file = require('./routes/qiniu')
 var user = require('./routes/user')
 var qrcode = require('./routes/qrcode')
@@ -30,6 +31,7 @@ app.use('/', index);
 app.use('/wechat', wechat);
 app.use('/qiniu', file);
 app.use('/users', user);
+app.use('/comments', comment);
 app.use('/qrcodes', qrcode);
 
 app.all('*', function (req, res, next) {
