@@ -2,9 +2,10 @@ var express = require('express');
 var mongoose = require('mongoose');
 var qiniu = require("qiniu");
 var http = require("http");
-var domainConfig = require('../configs/domain.json')
-var qiniuConfig = require('../configs/qiniu.json')
+var domainConfig = require('../configs/domain.json');
+var qiniuConfig = require('../configs/qiniu.json');
 var fileModel = mongoose.model('File');
+var userModel = mongoose.model('User');
 //需要填写你的 Access Key 和 Secret Key
 qiniu.conf.ACCESS_KEY = qiniuConfig.accessKey;
 qiniu.conf.SECRET_KEY = qiniuConfig.secretKey;
@@ -34,23 +35,19 @@ module.exports = {
      * @param next
      */
     uploadCallback: function (req, res, next) {
-        console.log("文件上传成功");
         var file = new fileModel(req.body);
-        var criteria = {key: req.body.key}; // 查询条件
-        console.log(criteria)
-        fileModel.find(criteria, function (err, result) {
-            if (err || result == null || result == '') {
+        fileModel.find({key: req.body.key}, function (err, fileEntity) {
+            if (err || fileEntity == null || fileEntity == '') {
                 console.log('根据key查询，文件不存在');
-                file.save(function (err, result) {
-                    if (err) {
-                        console.log('file信息保存错误 ....');
-                        console.log('error: ' + err)
-                    } else {
-                        console.log('file信息成功保存 ....');
-                        console.log("保存的用户结果为:" + result);
-                    }
-                });
-                res.status(201)
+                file.save();
+                console.log('file信息成功保存 ....');
+                userModel.findById(file.userid, function (err, userEntity) {
+                    console.log(userEntity)
+                    userEntity.keys.push(userEntity);
+                    userEntity.save();
+                    console.log('user表已经更新新的key');
+                })
+                res.status(200)
             }
             res.json(file);
         })
@@ -64,22 +61,27 @@ module.exports = {
      * @param next
      */
     persistentFile: function (req, res, next) {
-        var key = req.params.key;
-        var fileType = req.query.type;
+        var fileid = req.params.id;
+        var fileType = req.body.type;
         var fops = "yifangyun_preview/v2/ext=" + fileType;
-        var notifyURL = domainConfig.domain + "/qiniu/persistent/" + key;
-        opts = {
-            notifyURL: notifyURL
-        };
-        var PFOP = qiniu.fop.pfop(bucket, key, fops, opts, function (err, ret) {
-            if (!err) {
-                // 上传成功， 处理返回值
-                res.json({persistentId: ret.persistentId});
-            } else {
-                // 上传失败， 处理返回代码
-                res.json(err);
+        fileModel.findById(fileid, function (err, fileEntity) {
+            if (err)
+                console.log(err)
+            else {
+                var opts = {
+                    notifyURL: domainConfig.domain + "/qiniu/persistent/" + fileEntity.key
+                }
+                qiniu.fop.pfop(bucket, fileEntity.key, fops, opts, function (err, ret) {
+                    if (!err) {
+                        // 上传成功， 处理返回值
+                        res.json({persistentId: ret.persistentId});
+                    } else {
+                        // 上传失败， 处理返回代码
+                        res.json(err);
+                    }
+                })
             }
-        });
+        })
     },
 
     /**
@@ -89,17 +91,15 @@ module.exports = {
      * @param next
      */
     persistentFileCallback: function (req, res, next) {
-        console.log(req.body)
         var items = req.body.items;
         var code = items[0].code;
         var pdfKey = items[0].key;
         if (code == 0) {
             query = {key: req.body.inputKey};
-            console.log(query)
             fileModel.findOneAndUpdate(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, result) {
                 if (err)
                     console.log(err)
-                else console.log(result)
+                else console.log("转成pdf回调结果为" + result)
             })
         }
         res.end();

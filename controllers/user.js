@@ -11,10 +11,10 @@ module.exports = {
      * @param next
      */
     getUserFileListByPage: function (req, res, next) {
-        var openid = req.params.openid;
+        var userid = req.params.userid;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', {userid: openid, code: 0}, {}, function (error, $page) {
+        dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', {userid: userid, code: 0}, {}, function (error, $page) {
             if (error)
                 res.json(error)
             else
@@ -28,11 +28,9 @@ module.exports = {
      * @param next
      */
     getFile: function (req, res, next) {
-        var userid = req.params.openid;
-        var key = req.params.key;
-        console.log("当前文件key值:" + key)
-        var criteria = {key: key, userid: userid}; // 查询条件
-        fileModel.findOne(criteria, function (err, file) {
+        var userid = req.params.userid;
+        var fileid = req.params.fileid;
+        fileModel.findOne({key: fileid, userid: userid}, function (err, file) {
             if (err)
                 res.json(err)
             else if (file == null || file == '') {
@@ -50,12 +48,9 @@ module.exports = {
      * @param next
      */
     deleteFile: function (req, res, next) {
-        var client = new qiniu.rs.Client();
-        var userid = req.params.openid;
-        var key = req.params.key;
-
-        var criteria = {key: key, userid: userid}; // 查询条件
-        fileModel.findOneAndRemove(criteria, function (err, file) {
+        var userid = req.params.userid;
+        var fileid = req.params.fileid;
+        fileModel.findOneAndRemove({key: fileid, userid: userid}, function (err, file) {
             if (err)
                 res.json(err);
             else if (file == null || file == '') {

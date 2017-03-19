@@ -22,7 +22,6 @@ var pageQuery = function (page, pageSize, Model, populate, queryParams, sortPara
     var $page = {
         pageNumber: page
     };
-    console.log(pageSize)
     async.parallel({
         count: function (done) {  // 查询数量
             Model.count(queryParams).exec(function (err, count) {

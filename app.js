@@ -1,4 +1,5 @@
 // connect mongodb using mongoose middleware
+
 require('./helpers/connection');
 
 var express = require('express');
@@ -27,13 +28,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/', index);
-app.use('/wechat', wechat);
-app.use('/qiniu', file);
-app.use('/users', user);
-app.use('/comments', comment);
-app.use('/qrcodes', qrcode);
-
 app.all('*', function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
@@ -42,6 +36,14 @@ app.all('*', function (req, res, next) {
     res.header("Content-Type", "application/json;charset=utf-8");
     next();
 });
+app.use('/', index);
+app.use('/wechat', wechat);
+app.use('/qiniu', file);
+app.use('/users', user);
+app.use('/comments', comment);
+app.use('/qrcodes', qrcode);
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
