@@ -5,7 +5,8 @@ var UserItem = new Schema({
     openid: {type:String,unique:true},
     nickname: String,
     headimgurl: String,
-    files: [{type: Schema.Types.ObjectId, ref: 'File'}]
+    files: [{type: Schema.Types.ObjectId, ref: 'File'}],
+    comments: [{type: Schema.Types.ObjectId, ref: 'Comment'}]
 });
 
 module.exports = mongoose.model('User',UserItem);

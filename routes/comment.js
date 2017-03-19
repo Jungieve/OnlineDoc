@@ -2,6 +2,11 @@ var express = require('express');
 var router = express.Router();
 var commentController = require('../controllers/comment');
 
-router.post('/:fileKey/:pageIndex/:postid/', commentController.insertNewCommentAtPageIndex);
-// router.post('/:filekey/:pageIndex/:commentid/:replyid/replyTo/:originid', indexController.checkSignature);
+//插入新的评论（包括回复）
+router.post('/file/:id/:index/', commentController.insertNewCommentAtPageIndex);
+//分页获取某个文件评论列表
+router.get('/file/:id/:index/list', commentController.getCommentListByPage);
+
+//分页获取某个用户所拥有的评论列表
+router.get('/user/:id/list', commentController.getUserCommentListByPage);
 module.exports = router;
