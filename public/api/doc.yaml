@@ -1,0 +1,525 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: "云文档在线API"
+  description: 采用开源框架swagger。其中每一个接口的"Response Class"代表不同http的返回状态，
+   点击model可查看输出字段说明，example class代表输出样例，点击"try it not"可以在线crul。
+  contact:
+    name: 丛子涵
+    email: zihan.cong@gmail.com
+    url: https://github.com/jungieve
+  license:
+    name: MIT
+    url: http://opensource.org/licenses/MIT
+host: jungieve.s1.natapp.cc
+basePath: /
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /files/{:id}/list:
+    get:
+      summary: 分页获取历史文件列表
+      description: |
+        分页获取某个用户id的所有历史文件，其中:openid代表用户id值，get请求可携带参数pageIndex和pageSize（非必需）。
+      tags:
+        - 文件模块
+      produces:
+        - application/json
+      parameters:
+        - name: :id
+          in: path
+          description: 用户的id
+          required: true
+          type: string
+          format: string
+        - name: pageIndex
+          in: query
+          description: 分页下标，不填此参数默认为1。
+          required: false
+          type: number
+          format: int
+        - name: pageSize
+          in: query
+          description: 分页尺寸，不填默认不分页，直接全部查询。
+          required: false
+          type: number
+          format: int
+      responses:
+        '200':
+          description: 正确获取历史文件列表
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/fileListByPage'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /files/{:id}:
+    get:
+      summary: 查找指定文件及详细内容
+      produces:
+        - application/json
+      tags:
+        - 文件模块
+      parameters:
+        - name: :id
+          in: path
+          description: 文件的id
+          required: true
+          type: string
+          format: string
+      responses:
+        '200':
+          description: 成功找到指定的文件
+          schema:
+            $ref: '#/definitions/file'
+        '404':
+          description: 数据库中无法找到指定的文件
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+    delete:
+      summary: 删除指定文件
+      tags:
+        - 文件模块
+      parameters:
+        - name: :id
+          in: path
+          description: 文件的id
+          required: true
+          type: string
+          format: string
+      responses:
+        '204':
+          description: 成功删除文件并返回删除结果
+          schema:
+            $ref: '#/definitions/file'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+  /qiniu/upload/token:
+    get:
+      summary: 获取七牛云上传文件的token
+      produces:
+        - application/json
+      tags:
+        - 七牛模块
+      responses:
+        '200':
+          description: 成功获取token
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+                description: 七牛云上传token
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+  /qiniu/persistent/file/{:id}:
+    put:
+      summary: 转化文件为pdf
+      produces:
+        - application/json
+      tags:
+        - 七牛模块
+      parameters:
+        - name: :id
+          in: path
+          description: 需要转成pdf的文件id
+          required: true
+          type: string
+          format: string
+        - name: type
+          in: formData
+          description: 文件类型（请以文件名扩展名为基准，七牛自带的扩展名识别有时会识别不出，故不要以fileType字段为基准，建议以filename获取扩展名）。返回值
+          required: true
+          type: number
+          format: int
+      responses:
+        '200':
+          description: 成功进行转化并返回文件模型
+          schema:
+            type: object
+            properties:
+              persistentId:
+                type: string
+                description: 持久化id,具体操作见七牛文档“https://developer.qiniu.com/dora/api/persistent-processing-status-query-prefop”
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+  /http://upload.qiniu.com/:
+    get:
+      summary: 上传文件
+      description: 前端直接通过七牛接口进行上传，需携带一些特定参数
+      produces:
+        - application/json
+      tags:
+        - 七牛模块
+      parameters:
+        - name: token
+          in: formData
+          required: true
+          description: 从后台获取的七牛token
+          type: string
+          format: string
+        - name: x:userid
+          in: formData
+          required: true
+          description: 所属用户的id
+          type: string
+          format: string
+        - name: x:note
+          in: formData
+          required: true
+          description: 文件的备注
+          type: string
+          format: string
+        - name: file
+          in: formData
+          required: true
+          description: 要上传的文件
+          type: string
+          format: string
+        - name: detectMime
+          in: formData
+          required: false
+          description: 决定是否使用七牛自动识别文件格式（1为是）
+          type: number
+
+      responses:
+        '200':
+          description: 成功上传文件（详见七牛文档）
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /wechat/authorized/userinfo:
+    get:
+      summary: 移动端微信授权认证
+      produces:
+        - application/json
+      tags:
+        - 微信模块
+      responses:
+        '301':
+          description: 永久重定向到授权页，用户点击授权获取微信信息（不支持pc web调用，建议使用微信开发者工具）
+          schema:
+             $ref: '#/definitions/wechatList'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /wechat/authorized/base:
+    get:
+      summary: 微信静默获取openid
+      produces:
+        - application/json
+      tags:
+        - 微信模块
+      responses:
+        '301':
+          description: 永久重定向并静默授权，针对已授权的用户可以返回_id,openid,nickname及headimgurl等信息，对未授权的用户只能获取openid;请保证调用前用户已经通过/authrozied/userinfo进行授权认证。
+          schema:
+             $ref: '#/definitions/wechatList'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+  /comments/file/{:id}/{:index}:
+    post:
+      summary: 发起评论
+      description: 针对某文件的某一页发起评论
+      produces:
+        - application/json
+      tags:
+        - 评论模块
+      parameters:
+        - name: :id
+          in: path
+          required: true
+          description: 要追加评论的文件id
+          type: string
+          format: string
+        - name: :index
+          in: path
+          required: true
+          description: 要追加评论的文件页码
+          type: number
+        - name: commenterid
+          in: formData
+          required: true
+          description: 评论人的id
+          type: string
+        - name: comment
+          in: formData
+          required: true
+          description: 评论内容
+          type: string
+      responses:
+        '201':
+          description: 成功进行评论
+          schema:
+            $ref: '#/definitions/comment'
+        '404':
+          description: 找不到对应的评论人/回复人的openid
+          schema:
+            $ref: '#/definitions/errorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+
+  /comments/file/{:id}/{:index}/list:
+    get:
+      summary: 分页查看评论
+      description: 针对某文件的某一页分页查看全部评论
+      produces:
+        - application/json
+      tags:
+        - 评论模块
+      parameters:
+        - name: :id
+          in: path
+          required: true
+          description: 要查看的文件id
+          type: string
+          format: string
+        - name: :index
+          in: path
+          required: true
+          description: 要查看的文件页码
+          type: number
+        - name: pageIndex
+          in: query
+          required: false
+          description: 分页索引
+          type: number
+        - name: pageSize
+          in: query
+          required: false
+          description: 分页尺寸
+          type: number
+      responses:
+        '200':
+          description: 成功查看评论内容
+          schema:
+            type: object
+            properties:
+              pageNumber:
+                type: number
+                description: 文件的当前索引
+              pageCount:
+                type: number
+                description: 文件的页数
+              result:
+                $ref: '#/definitions/wechat'
+        '404':
+          description: 找不到对应的评论人/回复人的openid
+          schema:
+            $ref: '#/definitions/errorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+  /comments/user/{:id}/list:
+    get:
+      summary: 分页查看评论
+      description: 针对某文件的某一页分页查看全部评论
+      produces:
+        - application/json
+      tags:
+        - 评论模块
+      parameters:
+        - name: :id
+          in: path
+          required: true
+          description: 要查看的用户id
+          type: string
+          format: string
+        - name: pageIndex
+          in: query
+          required: false
+          description: 分页索引
+          type: number
+        - name: pageSize
+          in: query
+          required: false
+          description: 分页尺寸
+          type: number
+      responses:
+        '200':
+          description: 成功查看评论内容
+          schema:
+            type: object
+            properties:
+              pageNumber:
+                type: number
+                description: 文件的当前索引
+              pageCount:
+                type: number
+                description: 文件的页数
+              result:
+                $ref: '#/definitions/wechat'
+        '404':
+          description: 找不到对应的评论人/回复人的openid
+          schema:
+            $ref: '#/definitions/errorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+definitions:
+  file:
+    type: object
+    required:
+      - _id
+      - filename
+      - filesize
+      - fileType
+      - bucket
+      - key
+      - userid
+      - note
+      - create_at
+      - comments
+    properties:
+      _id:
+        type: string
+        description: 文件id，作为文件唯一认证
+      userid:
+        type: string
+        description: 文件所属的用户openid
+      filename:
+        type: string
+        description: 文件名称
+      filesize:
+        type: integer
+        description: 文件大小(bit为单位)
+      fileType:
+        type: string
+        description: 文件类型(如图片为image/png)
+      bucket:
+        type: string
+        description: 文件所存储在七牛的bucket名称
+      key:
+        type: string
+        description: 文件所存储在七牛的key名称
+      note:
+        type: string
+        description: 文件备注
+      create_at:
+        type: string
+        description: 文件生成时间，格式为mongodb date格式，如(2017-03-10T15:34:23.713Z)
+      comments:
+        type: array
+        items: {
+        }
+        description: 该文件所对应的评论id集合
+  fileListByPage:
+    type: object
+    required:
+      - pageCount
+      - results
+    properties:
+      pageNumber:
+        type: integer
+        description: 当前文件的页码
+      pageCount:
+        type: integer
+        description: 当前文件的总页数（根据pagesize计算，若无该参数返回null)
+      results:
+        type: array
+        items: {
+              $ref: '#/definitions/file'
+        }
+        description: 当前查找的文件列表
+  wechat:
+    type: object
+    required:
+      - _id
+      - openid
+      - nickname
+      - headimgurl
+      - files
+      - comments
+    properties:
+      _id:
+        type: string
+        description: 用户id，作为用户身份的唯一认证
+      openid:
+        type: string
+        description: 微信openid
+      nickname:
+        type: string
+        description: 微信昵称
+      headimgurl:
+        type: string
+        description: 微信头像url地址
+      files:
+        type: array
+        items: {
+        }
+        description: 该文件所对应的文件id集合
+      comments:
+        type: array
+        items: {
+        }
+        description: 该文件所对应的评论id集合
+  wechatList:
+    type: array
+    items: {
+              $ref: '#/definitions/wechat'
+        }
+  comment:
+    type: object
+    required:
+      - _id
+      - fileid
+      - index
+      - commenter
+    properties:
+      _id:
+        type: string
+        description: 评论id，作为评论唯一认证
+      fileid:
+        type: string
+        description: 评论所属的文件id
+      index:
+        type: number
+        description: 评论所属的文件页码
+      create_at:
+        type: string
+        description: 评论时间
+      commenter:
+        type: string
+        $ref: '#/definitions/wechat'
+  errorModel:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+        description: 错误代码
+      message:
+        type: string
+        description: 错误信息
