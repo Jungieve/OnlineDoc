@@ -24,7 +24,7 @@ request(app)
 //测试删除文件
 request(app)
     .delete('/users/oJJNnwRciaFfXY_C06NlrwWnjSYM/files/FqOQ8OYKilxlIkKlaci5V3z2u_VS')
-    .expect(200)
+    .expect(204)
     .expect(function (res) {
         if (!('key' in res.body)) throw new Error("missing key key");
     })
@@ -39,7 +39,7 @@ request(app)
     .delete('/users/oJJNnwRciaFfXY_C06NlrwWnjSYM/files/FqOQ8OYKilxlIkKlaci5V3z2u_VS')
     .expect(404)
     .expect(function (res) {
-        assert.deepEqual({code: 612, error: 'no such file or directory'}, res.body)
+        assert.deepEqual({code: 612, error: 'no such qiniu or directory'}, res.body)
     })
     .end(function (err, res) {
         if (err)

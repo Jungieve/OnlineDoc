@@ -11,10 +11,10 @@ module.exports = {
      * @param next
      */
     getUserFileListByPage: function (req, res, next) {
-        var userid = req.params.userid;
+        var userid = req.params.id;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', {userid: userid, code: 0}, {}, function (error, $page) {
+        dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', {userid: userid}, {}, function (error, $page) {
             if (error)
                 res.json(error)
             else
@@ -28,9 +28,8 @@ module.exports = {
      * @param next
      */
     getFile: function (req, res, next) {
-        var userid = req.params.userid;
-        var fileid = req.params.fileid;
-        fileModel.findOne({key: fileid, userid: userid}, function (err, file) {
+        var fileid = req.params.id;
+        fileModel.findById(fileid, function (err, file) {
             if (err)
                 res.json(err)
             else if (file == null || file == '') {
@@ -42,15 +41,14 @@ module.exports = {
         })
     },
     /**
-     * 从七牛删除一个文件并在数据库删除
+     * 删除一个文件并在数据库删除
      * @param req
      * @param res
      * @param next
      */
     deleteFile: function (req, res, next) {
-        var userid = req.params.userid;
         var fileid = req.params.fileid;
-        fileModel.findOneAndRemove({key: fileid, userid: userid}, function (err, file) {
+        fileModel.findByIdAndRemove(fileid, function (err, file) {
             if (err)
                 res.json(err);
             else if (file == null || file == '') {

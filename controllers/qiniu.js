@@ -43,7 +43,7 @@ module.exports = {
                 console.log('file信息成功保存 ....');
                 userModel.findById(file.userid, function (err, userEntity) {
                     console.log(userEntity)
-                    userEntity.keys.push(userEntity);
+                    userEntity.files.push(file);
                     userEntity.save();
                     console.log('user表已经更新新的key');
                 })

@@ -15,7 +15,7 @@ router.post('/upload/callback', qiniuController.uploadCallback);
 /**
  * 七牛持久化方法，能够对指定id的文件进行持久化操作（转为pdf)
  */
-router.put('/persistent/file/:id', qiniuController.persistentFile);
+router.put('/persistent/qiniu/:id', qiniuController.persistentFile);
 
 /**
  * 七牛回调方法,成功上传后并从数据库中写入一个文件

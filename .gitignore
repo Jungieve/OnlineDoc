@@ -8,5 +8,5 @@ configs/
 npm-debug.log*
 
 
-# wechat oauth file
+# wechat oauth qiniu
 public/MP_verify_pRhCnMcF4OrscpHp.txt

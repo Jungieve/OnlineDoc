@@ -5,15 +5,15 @@ var userController = require('../controllers/user');
 /**
  * 分页获取用户的文件列表
  */
-router.get('/:userid/files', userController.getUserFileListByPage);
+router.get('/:id/list', userController.getUserFileListByPage);
 
 /**
  * 从七牛与数据库中删除一个文件
  */
-router.delete('/:userid/files/:fileid', userController.deleteFile);
+router.delete('/:id', userController.deleteFile);
 
 /**
  * 从数据库中获取一个文件
  */
-router.get('/:userid/files/:fileid', userController.getFile);
+router.get('/:id', userController.getFile);
 module.exports = router;

@@ -12,8 +12,8 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var wechat = require('./routes/wechat')
 var comment = require('./routes/comment')
-var file = require('./routes/qiniu')
-var user = require('./routes/user')
+var qiniu = require('./routes/qiniu')
+var file = require('./routes/file')
 var qrcode = require('./routes/qrcode')
 var app = express();
 
@@ -38,8 +38,8 @@ app.all('*', function (req, res, next) {
 });
 app.use('/', index);
 app.use('/wechat', wechat);
-app.use('/qiniu', file);
-app.use('/users', user);
+app.use('/qiniu', qiniu);
+app.use('/files', file);
 app.use('/comments', comment);
 app.use('/qrcodes', qrcode);
 

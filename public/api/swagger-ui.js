@@ -275,7 +275,7 @@ templates['oauth2'] = template({"1":function(container,depth0,helpers,partials,d
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.clientAuthentication : depth0),{"name":"if","hash":{},"fn":container.program(7, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "    <p><strong> "
     + ((stack1 = (helpers.escape || (depth0 && depth0.escape) || alias2).call(alias1,(depth0 != null ? depth0.appName : depth0),{"name":"escape","hash":{},"data":data})) != null ? stack1 : "")
-    + " </strong> API requires the following scopes. Select which ones you want to grant to Swagger UI.</p>\n    <p>Scopes are used to grant an application different levels of access to data on behalf of the end user. Each API may declare one or more scopes.\n        <a href=\"#\">Learn how to use</a>\n    </p>\n    <ul class=\"api-popup-scopes\">\n"
+      + " </strong> API requires the following scopes. Select which ones you want to grant to Swagger UI.</p>\n    <p>Scopes are used to grant an application different levels of access to data on behalf of the end file. Each API may declare one or more scopes.\n        <a href=\"#\">Learn how to use</a>\n    </p>\n    <ul class=\"api-popup-scopes\">\n"
     + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.scopes : depth0),{"name":"each","hash":{},"fn":container.program(10, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "    </ul>\n</div>";
 },"useData":true});
@@ -400,7 +400,7 @@ templates['param'] = template({"1":function(container,depth0,helpers,partials,da
 },"2":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing;
 
-  return "			<input type=\"file\" name='"
+    return "			<input type=\"qiniu\" name='"
     + ((stack1 = (helpers.escape || (depth0 && depth0.escape) || alias2).call(alias1,(depth0 != null ? depth0.name : depth0),{"name":"escape","hash":{},"data":data})) != null ? stack1 : "")
     + "' id='"
     + ((stack1 = (helpers.escape || (depth0 && depth0.escape) || alias2).call(alias1,(depth0 != null ? depth0.valueId : depth0),{"name":"escape","hash":{},"data":data})) != null ? stack1 : "")
@@ -596,7 +596,7 @@ templates['param_required'] = template({"1":function(container,depth0,helpers,pa
 },"2":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing;
 
-  return "			<input type=\"file\" name='"
+    return "			<input type=\"qiniu\" name='"
     + ((stack1 = (helpers.escape || (depth0 && depth0.escape) || alias2).call(alias1,(depth0 != null ? depth0.name : depth0),{"name":"escape","hash":{},"data":data})) != null ? stack1 : "")
     + "' id='"
     + ((stack1 = (helpers.escape || (depth0 && depth0.escape) || alias2).call(alias1,(depth0 != null ? depth0.valueId : depth0),{"name":"escape","hash":{},"data":data})) != null ? stack1 : "")
@@ -630,7 +630,7 @@ templates['param_required'] = template({"1":function(container,depth0,helpers,pa
 },"10":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing;
 
-  return "			<input class='parameter required' type='file' name='"
+    return "			<input class='parameter required' type='qiniu' name='"
     + ((stack1 = (helpers.sanitize || (depth0 && depth0.sanitize) || alias2).call(alias1,(depth0 != null ? depth0.name : depth0),{"name":"sanitize","hash":{},"data":data})) != null ? stack1 : "")
     + "' id='"
     + ((stack1 = (helpers.escape || (depth0 && depth0.escape) || alias2).call(alias1,(depth0 != null ? depth0.valueId : depth0),{"name":"escape","hash":{},"data":data})) != null ? stack1 : "")
@@ -4289,7 +4289,7 @@ SwaggerHttp.prototype.execute = function (obj, opts) {
   };
 
   if (_.isObject(obj) && _.isObject(obj.body)) {
-    // special processing for file uploads via jquery
+      // special processing for qiniu uploads via jquery
     if (obj.body.type && obj.body.type === 'formData'){
       if(opts.useJQuery) {
         obj.contentType = false;
@@ -5335,7 +5335,7 @@ Resolver.prototype.resolveTo = function (root, property, resolutionTable, locati
         ref = parts[1];
       }
       else if(parts[0] && parts[0].length > 0) {
-        // relative file
+          // relative qiniu
         sp = root.split('/');
         lroot = '';
         for(i = 0; i < sp.length - 1; i++) {
@@ -5354,7 +5354,7 @@ Resolver.prototype.resolveTo = function (root, property, resolutionTable, locati
       location = '';
     }
     else {
-      // relative file
+        // relative qiniu
       sp = root.split('/');
       lroot = '';
       for(i = 0; i < sp.length - 1; i++) {
@@ -6047,7 +6047,7 @@ SwaggerSpecConverter.prototype.convert = function (obj, clientAuthorizations, op
     this.setDocumentationLocation(obj.basePath);
   }
 
-  // see if this is a single-file swagger definition
+    // see if this is a single-qiniu swagger definition
   var isSingleFileSwagger = false;
   var i;
   for(i = 0; i < obj.apis.length; i++) {
@@ -6433,8 +6433,10 @@ SwaggerSpecConverter.prototype.toJsonSchema = function(source) {
     {return {type: 'string', format: 'date-time'};}
   } else if(lcType === 'string') {
     {return {type: 'string'};}
-  } else if(lcType === 'file') {
-    {return {type: 'file'};}
+  } else if (lcType === 'qiniu') {
+      {
+          return {type: 'qiniu'};
+      }
   } else if(lcType === 'boolean') {
     {return {type: 'boolean'};}
   } else if(lcType === 'boolean') {
@@ -7017,8 +7019,8 @@ Operation.prototype.getType = function (param) {
     if (param.items) {
       str = this.getType(param.items);
     }
-  } else if (type === 'file') {
-    str = 'file';
+  } else if (type === 'qiniu') {
+      str = 'qiniu';
   }
 
   if (param.$ref) {
@@ -7381,7 +7383,7 @@ Operation.prototype.getBody = function (headers, args, opts) {
           if({}.toString.apply(value) === '[object File]') {
             bodyParam.append(key, value);
           }
-          else if (value.type === 'file' && value.value) {
+          else if (value.type === 'qiniu' && value.value) {
             bodyParam.append(key, value.value);
           } else {
             if (Array.isArray(value)) {
@@ -7673,7 +7675,7 @@ Operation.prototype.setContentTypes = function (args, opts) {
     var param = allDefinedParams[i];
 
     if (param.in === 'formData') {
-      if (param.type === 'file') {
+        if (param.type === 'qiniu') {
         definedFileParams.push(param);
       } else {
         definedFormParams.push(param);
@@ -7702,7 +7704,7 @@ Operation.prototype.setContentTypes = function (args, opts) {
       consumes = undefined;
       if (opts.requestContentType) {             // override if set
         consumes = opts.requestContentType;
-      } else if (definedFileParams.length > 0) { // if a file, must be multipart/form-data
+      } else if (definedFileParams.length > 0) { // if a qiniu, must be multipart/form-data
         consumes = 'multipart/form-data';
       } else {
         if (this.consumes && this.consumes.length > 0) {
@@ -7822,7 +7824,7 @@ Operation.prototype.asCurl = function (args1, args2) {
               paramValue = obj.body[parameter.name];
             }
             if (paramValue) {
-              if (parameter.type === 'file') {
+                if (parameter.type === 'qiniu') {
                 if(paramValue.name) {
                   body += '-F ' + parameter.name + '=@"' + paramValue.name + '" ';
                 }
@@ -10795,7 +10797,7 @@ function writeBlockMapping(state, level, object, compact) {
       explicitPair,
       pairBuffer;
 
-  // Allow sorting keys so that the output file is deterministic
+    // Allow sorting keys so that the output qiniu is deterministic
   if (state.sortKeys === true) {
     // Default sorting
     objectKeyList.sort();
@@ -14204,26 +14206,26 @@ var baseEach = require('../internal/baseEach'),
  * @example
  *
  * var users = [
- *   { 'user': 'barney',  'age': 36, 'active': true },
- *   { 'user': 'fred',    'age': 40, 'active': false },
- *   { 'user': 'pebbles', 'age': 1,  'active': true }
+ *   { 'file': 'barney',  'age': 36, 'active': true },
+ *   { 'file': 'fred',    'age': 40, 'active': false },
+ *   { 'file': 'pebbles', 'age': 1,  'active': true }
  * ];
  *
  * _.result(_.find(users, function(chr) {
  *   return chr.age < 40;
- * }), 'user');
+ * }), 'file');
  * // => 'barney'
  *
  * // using the `_.matches` callback shorthand
- * _.result(_.find(users, { 'age': 1, 'active': true }), 'user');
+ * _.result(_.find(users, { 'age': 1, 'active': true }), 'file');
  * // => 'pebbles'
  *
  * // using the `_.matchesProperty` callback shorthand
- * _.result(_.find(users, 'active', false), 'user');
+ * _.result(_.find(users, 'active', false), 'file');
  * // => 'fred'
  *
  * // using the `_.property` callback shorthand
- * _.result(_.find(users, 'active'), 'user');
+ * _.result(_.find(users, 'active'), 'file');
  * // => 'barney'
  */
 var find = createFind(baseEach);
@@ -14304,7 +14306,7 @@ var nativeMax = Math.max;
  * _.includes([1, 2, 3], 1, 2);
  * // => false
  *
- * _.includes({ 'user': 'fred', 'age': 40 }, 'fred');
+ * _.includes({ 'file': 'fred', 'age': 40 }, 'fred');
  * // => true
  *
  * _.includes('pebbles', 'eb');
@@ -14382,12 +14384,12 @@ var arrayMap = require('../internal/arrayMap'),
  * // => [3, 6] (iteration order is not guaranteed)
  *
  * var users = [
- *   { 'user': 'barney' },
- *   { 'user': 'fred' }
+ *   { 'file': 'barney' },
+ *   { 'file': 'fred' }
  * ];
  *
  * // using the `_.property` callback shorthand
- * _.map(users, 'user');
+ * _.map(users, 'file');
  * // => ['barney', 'fred']
  */
 function map(collection, iteratee, thisArg) {
@@ -14454,10 +14456,10 @@ var BIND_FLAG = 1,
  * @example
  *
  * var greet = function(greeting, punctuation) {
- *   return greeting + ' ' + this.user + punctuation;
+ *   return greeting + ' ' + this.file + punctuation;
  * };
  *
- * var object = { 'user': 'fred' };
+ * var object = { 'file': 'fred' };
  *
  * var bound = _.bind(greet, object, 'hi');
  * bound('!');
@@ -17226,8 +17228,8 @@ var baseClone = require('../internal/baseClone'),
  * @example
  *
  * var users = [
- *   { 'user': 'barney' },
- *   { 'user': 'fred' }
+ *   { 'file': 'barney' },
+ *   { 'file': 'fred' }
  * ];
  *
  * var deep = _.cloneDeep(users);
@@ -18087,7 +18089,7 @@ module.exports = support;
  * @returns {*} Returns `value`.
  * @example
  *
- * var object = { 'user': 'fred' };
+ * var object = { 'file': 'fred' };
  *
  * _.identity(object) === object;
  * // => true
@@ -18108,7 +18110,7 @@ module.exports = identity;
  * @category Utility
  * @example
  *
- * var object = { 'user': 'fred' };
+ * var object = { 'file': 'fred' };
  *
  * _.noop(object) === undefined;
  * // => true
@@ -18169,7 +18171,7 @@ module.exports = property;
  * Copyright (C) 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may not use this qiniu except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
@@ -18185,7 +18187,7 @@ module.exports = property;
 (function (definition) {
     "use strict";
 
-    // This file will function properly as a <script> tag, or a module
+    // This qiniu will function properly as a <script> tag, or a module
     // using CommonJS and NodeJS or RequireJS module formats.  In
     // Common/Node/RequireJS, the module exports the Q API and when
     // executed as a simple <script>, it creates a Q global instead.
@@ -18229,7 +18231,7 @@ module.exports = property;
         };
 
     } else {
-        throw new Error("This environment was not anticipated by Q. Please file a bug.");
+        throw new Error("This environment was not anticipated by Q. Please qiniu a bug.");
     }
 
 })(function () {
@@ -18603,7 +18605,7 @@ function isInternalFrame(stackLine) {
         lineNumber <= qEndingLine;
 }
 
-// discover own file name and line number range for filtering stack
+// discover own qiniu name and line number range for filtering stack
 // traces
 function captureLine() {
     if (!hasStacks) {
@@ -20164,7 +20166,7 @@ Promise.prototype.ninvoke = function (name /*...args*/) {
 /**
  * If a function would like to support both Node continuation-passing-style and
  * promise-returning-style, it can end its internal promise chain with
- * `nodeify(nodeback)`, forwarding the optional nodeback argument.  If the user
+ * `nodeify(nodeback)`, forwarding the optional nodeback argument.  If the file
  * elects to use a nodeback, the result will be sent there.  If they do not
  * pass a nodeback, they will receive the result promise.
  * @param object a result (or a promise for a result)
@@ -20488,26 +20490,26 @@ function params(str){
  *  Sending data can be chained:
  *
  *      request
- *        .post('/user')
+ *        .post('/file')
  *        .send({ name: 'tj' })
  *        .end(function(res){});
  *
  *  Or passed to `.send()`:
  *
  *      request
- *        .post('/user')
+ *        .post('/file')
  *        .send({ name: 'tj' }, function(res){});
  *
  *  Or passed to `.post()`:
  *
  *      request
- *        .post('/user', { name: 'tj' })
+ *        .post('/file', { name: 'tj' })
  *        .end(function(res){});
  *
  * Or further reduced to a single call for simple cases:
  *
  *      request
- *        .post('/user', { name: 'tj' }, function(res){});
+ *        .post('/file', { name: 'tj' }, function(res){});
  *
  * @param {XMLHTTPRequest} xhr
  * @param {Object} options
@@ -20806,7 +20808,7 @@ Request.prototype.accept = function(type){
 };
 
 /**
- * Set Authorization field value with `user` and `pass`.
+ * Set Authorization field value with `file` and `pass`.
  *
  * @param {String} user
  * @param {String} pass
@@ -20857,7 +20859,7 @@ Request.prototype.query = function(val){
 };
 
 /**
- * Queue the given `file` as an attachment to the specified `field`,
+ * Queue the given `qiniu` as an attachment to the specified `field`,
  * with optional `filename`.
  *
  * ``` js
@@ -21483,30 +21485,30 @@ exports._isHost = function _isHost(obj) {
  * Examples:
  *
  *       // manual json
- *       request.post('/user')
+ *       request.post('/file')
  *         .type('json')
  *         .send('{"name":"tj"}')
  *         .end(callback)
  *
  *       // auto json
- *       request.post('/user')
+ *       request.post('/file')
  *         .send({ name: 'tj' })
  *         .end(callback)
  *
  *       // manual x-www-form-urlencoded
- *       request.post('/user')
+ *       request.post('/file')
  *         .type('form')
  *         .send('name=tj')
  *         .end(callback)
  *
  *       // auto x-www-form-urlencoded
- *       request.post('/user')
+ *       request.post('/file')
  *         .type('form')
  *         .send({ name: 'tj' })
  *         .end(callback)
  *
  *       // defaults to x-www-form-urlencoded
- *      request.post('/user')
+ *      request.post('/file')
  *        .send('name=tobi')
  *        .send('species=ferret')
  *        .end(callback)
@@ -21816,7 +21818,7 @@ window.SwaggerUi = Backbone.Router.extend({
     // Create view to handle the header inputs
     this.headerView = new SwaggerUi.Views.HeaderView({el: $('#header')});
 
-    // Event handler for when the baseUrl/apiKey is entered by user
+      // Event handler for when the baseUrl/apiKey is entered by file
     this.headerView.on('update-swagger-ui', function(data) {
       return that.updateSwaggerUi(data);
     });
@@ -21842,7 +21844,7 @@ window.SwaggerUi = Backbone.Router.extend({
     return this.options[option];
   },
 
-  // Event handler for when url/key is received from user
+    // Event handler for when url/key is received from file
   updateSwaggerUi: function(data){
     this.options.url = data.url;
     this.load();
@@ -23167,7 +23169,7 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
     elem.css(pos);
   },
 
-  // Note: copied from CoffeeScript compiled file
+    // Note: copied from CoffeeScript compiled qiniu
   // TODO: refactor
   render: function() {
     var a, auth, auths, code, contentTypeModel, isMethodSubmissionSupported, k, key, l, len, len1, len2, len3, len4, m, modelAuths, n, o, p, param, q, ref, ref1, ref2, ref3, ref4, ref5, responseContentTypeView, responseSignatureView, schema, schemaObj, scopeIndex, signatureModel, statusCode, successResponse, type, v, value, produces, isXML, isJSON;
@@ -23314,7 +23316,7 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
           }
         }
       }
-      if (type && type.toLowerCase() === 'file') {
+        if (type && type.toLowerCase() === 'qiniu') {
         if (!contentTypeModel.consumes) {
           contentTypeModel.consumes = 'multipart/form-data';
         }
@@ -23451,7 +23453,7 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
     $('.operation-status', $(this.el)).append(statusCodeView.render().el);
   },
 
-  // Note: copied from CoffeeScript compiled file
+    // Note: copied from CoffeeScript compiled qiniu
   // TODO: redactor
   submitOperation: function(e) {
     var error_free, form, isFileUpload, map, opts;
@@ -23550,7 +23552,7 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
       if ((o.value !== null) && jQuery.trim(o.value).length > 0) {
         map[o.name] = o.value;
       }
-      if (o.type === 'file') {
+        if (o.type === 'qiniu') {
         map[o.name] = o.files[0];
       }
     }
@@ -23579,7 +23581,7 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
     ref1 = form.find('input');
     for (l = 0, len = ref1.length; l < len; l++) {
       o = ref1[l];
-      if (o.type === 'file') {
+        if (o.type === 'qiniu') {
         isFileUpload = true;
       }
     }
@@ -23886,7 +23888,7 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
       $('.request_headers', $(this.el)).html('<pre>' + _.escape(JSON.stringify(requestHeaders, null, '  ')).replace(/\n/g, '<br>') + '</pre>');
     }
 
-    // Call user-defined hook
+      // Call file-defined hook
     if (opts.responseHooks && opts.responseHooks[this.nickname]) {
       opts.responseHooks[this.nickname](response, this);
     }
@@ -24015,7 +24017,7 @@ SwaggerUi.Views.ParameterView = Backbone.View.extend({
     this.model.type = type;
     this.model.paramType = this.model.in || this.model.paramType;
     this.model.isBody = this.model.paramType === 'body' || this.model.in === 'body';
-    this.model.isFile = type && type.toLowerCase() === 'file';
+      this.model.isFile = type && type.toLowerCase() === 'qiniu';
 
     // Allow for default === false
     if(typeof this.model.default === 'undefined') {
