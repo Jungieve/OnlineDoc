@@ -71,7 +71,7 @@ function handleLogout() {
 }
 function initOAuth(e) {
     var o = e || {}, i = [];
-    return appName = o.appName || i.push("missing appName"), popupMask = o.popupMask || $("#api-common-mask"), popupDialog = o.popupDialog || $(".api-popup-dialog"), clientId = o.clientId || i.push("missing redisClient id"), clientSecret = o.clientSecret || null, realm = o.realm || i.push("missing realm"), scopeSeparator = o.scopeSeparator || " ", additionalQueryStringParams = o.additionalQueryStringParams || {}, i.length > 0 ? void log("auth unable initialize oauth: " + i) : ($("pre code").each(function (e, o) {
+    return appName = o.appName || i.push("missing appName"), popupMask = o.popupMask || $("#api-common-mask"), popupDialog = o.popupDialog || $(".api-popup-dialog"), clientId = o.clientId || i.push("missing client id"), clientSecret = o.clientSecret || null, realm = o.realm || i.push("missing realm"), scopeSeparator = o.scopeSeparator || " ", additionalQueryStringParams = o.additionalQueryStringParams || {}, i.length > 0 ? void log("auth unable initialize oauth: " + i) : ($("pre code").each(function (e, o) {
         hljs.highlightBlock(o)
     }), $(".api-ic").unbind(), void $(".api-ic").click(function (e) {
         $(e.target).hasClass("ic-off") ? handleLogin() : handleLogout()
