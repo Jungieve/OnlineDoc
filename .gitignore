@@ -1,6 +1,6 @@
 # Dependency directories
 node_modules/
-configs/
+#configs/
 .idea/
 
 
@@ -9,4 +9,4 @@ npm-debug.log*
 
 
 # wechat oauth qiniu
-public/MP_verify_pRhCnMcF4OrscpHp.txt
+#public/MP_verify_pRhCnMcF4OrscpHp.txt
