@@ -1,6 +1,7 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var dbHelper = require('../helpers/dbHelper')
+
 var commentModel = mongoose.model('Comment');
 var userModel = mongoose.model('User');
 var fileModel = mongoose.model('File');
@@ -16,19 +17,18 @@ module.exports = {
         var index = req.params.index;
         var commenter = req.body.commenterid;
         var comment = req.body.comment;
-        userModel.findById(commenter, function (err, userEntity) {
-            if (err || userEntity == null || userEntity == '') {
+        userModel.findById(commenter, function (err, commenterEntity) {
+            if (err || commenterEntity == null || commenterEntity == '') {
                 console.log('根据openid查询，评论用户不存在')
                 res.status(404).end();
             }
             else {
                 var commentData = new commentModel({
-                    commenter: userEntity,
+                    commenter: commenterEntity,
                     comment: comment,
                     index: index,
                     fileid: fileid,
                 });
-
                 commentData.save(function (err, result) {
                     if (err) {
                         console.log('评论保存错误: ' + err)
@@ -44,9 +44,13 @@ module.exports = {
                         fileEntity.comments.push(commentData);
                         fileEntity.save();
                     }
+                    userModel.findById(fileEntity['userid'], function (err, userEntity) {
+                        if (err)
+                            console.log(err)
+                        userEntity.comments.push(commentData);
+                        userEntity.save();
+                    })
                 });
-                userEntity.comments.push(commentData);
-                userEntity.save();
                 console.log("评论保存时用户实体也进行了更新")
                 res.status(201);
             }

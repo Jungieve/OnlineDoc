@@ -1,6 +1,13 @@
 // connect mongodb using mongoose middleware
 
-require('./helpers/connection');
+require('./helpers/mongoConnection');
+var redis = require('redis');
+var redisClient = redis.createClient();
+
+redisClient.on('connect', function () {
+    console.log('Redis connected ');
+});
+
 
 var express = require('express');
 var path = require('path');
@@ -8,6 +15,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+
 
 var index = require('./routes/index');
 var wechat = require('./routes/wechat')
