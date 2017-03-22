@@ -37,8 +37,14 @@ module.exports = {
     uploadCallback: function (req, res, next) {
         var file = new fileModel(req.body);
         fileModel.find({key: req.body.key}, function (err, fileEntity) {
-            if (err || fileEntity == null || fileEntity == '') {
+            if (err) {
+                res.json(err)
+            }
+            else if (fileEntity == null || fileEntity == '') {
                 console.log('根据key查询，文件不存在');
+                res.json(req.body)
+            }
+            else {
                 file.save();
                 console.log('file信息成功保存 ....');
                 userModel.findById(file.userid, function (err, userEntity) {
