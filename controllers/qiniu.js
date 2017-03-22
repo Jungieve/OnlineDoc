@@ -26,7 +26,7 @@ module.exports = {
         putPolicy.callbackBody = 'filename=$(fname)&filesize=$(fsize)&fileType=$(mimeType)' +
             '&bucket=$(bucket)&key=$(key)' +
             '&userid=$(x:userid)&note=$(x:note)';
-        res.json(({token: putPolicy.token()}))
+        res.json(({uptoken: putPolicy.token()}))
     },
     /**
      * 七牛上传成功回调方法（写入数据库）
