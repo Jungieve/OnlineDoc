@@ -118,7 +118,7 @@ paths:
           schema:
             type: object
             properties:
-              token:
+              uptoken:
                 type: string
                 description: 七牛云上传token
         '500':
