@@ -38,6 +38,7 @@ module.exports = {
         var file = new fileModel(req.body);
         fileModel.find({key: req.body.key}, function (err, fileEntity) {
             if (err) {
+                console.log(err)
                 res.json(err)
             }
             else if (fileEntity == null || fileEntity == '') {
