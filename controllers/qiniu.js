@@ -54,9 +54,8 @@ module.exports = {
                     userEntity.save();
                     console.log('user表已经更新新的key');
                 })
-                res.status(200)
+                res.json(file).status(200)
             }
-            res.json(file);
         })
 
     },
