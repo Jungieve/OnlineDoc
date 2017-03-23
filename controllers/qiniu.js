@@ -42,10 +42,7 @@ module.exports = {
                 res.json(err)
             }
             else if (fileEntity == null || fileEntity == '') {
-                console.log('根据key查询，文件不存在');
-                res.json(req.body)
-            }
-            else {
+                console.log('根据key查询，文件不存在,尝试重新生成');
                 file.save();
                 console.log('file信息成功保存 ....');
                 userModel.findById(file.userid, function (err, userEntity) {
@@ -55,6 +52,9 @@ module.exports = {
                     console.log('user表已经更新新的key');
                 })
                 res.json(file).status(200)
+            }
+            else {
+                console.log("数据库已经有这个文件了")
             }
         })
 
