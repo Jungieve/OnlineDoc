@@ -41,21 +41,36 @@ module.exports = {
                 console.log(err)
                 res.json(err)
             }
-            else if (fileEntity == null || fileEntity == '') {
-                console.log('根据key查询，文件不存在,尝试重新生成');
-                file.save();
-                console.log('file信息成功保存 ....');
-                userModel.findById(file.userid, function (err, userEntity) {
-                    console.log(userEntity)
-                    userEntity.files.push(file);
-                    userEntity.save();
-                    console.log('user表已经更新新的key');
-                })
-                res.json(file).status(200)
-            }
             else {
-                console.log("数据库已经有这个文件了")
+                userModel.findById(file.userid, function (err, userEntity) {
+                    if (userEntity == null) {
+                        console.log("查询不到目标用户")
+                        res.json({error: "目标用户不存在"}).status(204);
+                    }
+                    else {
+                        console.log(userEntity)
+                        userEntity.files.push(file);
+                        userEntity.save();
+                        console.log('user表已经更新新的key');
+                        if (fileEntity == null || fileEntity == '') {
+                            console.log('根据key查询，文件不存在,尝试重新生成');
+                            file.save();
+                            console.log('file信息成功保存 ....');
+                        }
+                        else {
+                            console.log("数据库已经有这个文件了")
+                            fileModel.update({_id: fileEntity._id}, file, function (err) {
+                                if (err)
+                                    console.log(err)
+                            })
+
+                        }
+                        res.json(file)
+                    }
+                })
+
             }
+
         })
 
     },
