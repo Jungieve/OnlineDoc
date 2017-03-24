@@ -1,7 +1,7 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var dbHelper = require('../helpers/dbHelper')
-
+var redisConnection = require('../helpers/redisConnection')
 var commentModel = mongoose.model('Comment');
 var userModel = mongoose.model('User');
 var fileModel = mongoose.model('File');
@@ -49,9 +49,12 @@ module.exports = {
                             console.log(err)
                         userEntity.comments.push(commentData);
                         userEntity.save();
+                        console.log("评论保存时用户实体也进行了更新")
                     })
+
                 });
-                console.log("评论保存时用户实体也进行了更新")
+                redisConnection.redisClient.hmset(fileEntity['userid'], commentData);
+                console.log("评论成功")
                 res.status(201);
             }
         });

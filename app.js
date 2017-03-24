@@ -1,12 +1,7 @@
 // connect mongodb using mongoose middleware
 
 require('./helpers/mongoConnection');
-var redis = require('redis');
-var redisClient = redis.createClient();
-
-redisClient.on('connect', function () {
-    console.log('Redis connected ');
-});
+var redisConnection = require('./helpers/redisConnection');
 
 
 var express = require('express');
