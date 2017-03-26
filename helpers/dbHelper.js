@@ -29,13 +29,14 @@ var pageQuery = function (page, pageSize, Model, populate, queryParams, sortPara
             });
         },
         records: function (done) {   // 查询一页的记录
+            console.log(sortParams)
             Model.find(queryParams).skip(start).limit(pageSize).populate(populate).sort(sortParams).exec(function (err, doc) {
                 done(err, doc);
             });
         }
     }, function (err, results) {
         var count = results.count;
-        $page.pageCount = (count - 1) / pageSize + 1;
+        $page.pageCount = parseInt((count - 1) / pageSize) + 1;
         $page.results = results.records;
         callback(err, $page);
     });

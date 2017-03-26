@@ -1,7 +1,6 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var dbHelper = require('../helpers/dbHelper')
-var qiniu = require("qiniu");
 var fileModel = mongoose.model('File');
 module.exports = {
     /**
@@ -14,7 +13,9 @@ module.exports = {
         var userid = req.params.id;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', {userid: userid}, {}, function (error, $page) {
+        dbHelper.pageQuery(pageIndex, pageSize, fileModel, 'files', userid, {
+            "create_at": 'desc'
+        }, function (error, $page) {
             if (error)
                 res.json(error)
             else

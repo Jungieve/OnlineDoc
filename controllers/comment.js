@@ -2,9 +2,9 @@ var express = require('express');
 var mongoose = require('mongoose');
 var dbHelper = require('../helpers/dbHelper')
 var redisConnection = require('../helpers/redisConnection')
-var commentModel = mongoose.model('Comment');
 var userModel = mongoose.model('User');
 var fileModel = mongoose.model('File');
+var commentModel = mongoose.model('Comment')
 module.exports = {
     /**
      * 页码新增评论
@@ -17,7 +17,7 @@ module.exports = {
         var index = req.params.index;
         var commenter = req.body.commenterid;
         var comment = req.body.comment;
-        userModel.findById(commenter, function (err, commenterEntity) {
+        userModel.findById(commenter, {files: 0, comments: 0}, function (err, commenterEntity) {
             if (err || commenterEntity == null || commenterEntity == '') {
                 console.log('根据openid查询，评论用户不存在')
                 res.status(404).end();
@@ -29,6 +29,7 @@ module.exports = {
                     index: index,
                     fileid: fileid,
                 });
+
                 commentData.save(function (err, result) {
                     if (err) {
                         console.log('评论保存错误: ' + err)
@@ -40,9 +41,26 @@ module.exports = {
                 fileModel.findById(fileid, function (err, fileEntity) {
                     if (err)
                         console.log(err)
+                    else if (fileEntity == null || fileEntity == '') {
+                        console.log("找不到文件")
+                        res.json({error: "找不到对应的评论文件"})
+                    }
                     else {
                         fileEntity.comments.push(commentData);
                         fileEntity.save();
+                        var redisUserKeyForFiles = fileEntity.userid.toString() + "files";
+                        var redisUserKeyForComments = fileEntity.userid.toString() + "comments";
+                        var redisUserDataForComments = {};
+                        redisUserDataForComments[fileEntity.userid] = (commentData);
+                        redisConnection.redisClient.sadd(redisUserKeyForFiles, fileEntity["_id"].toString()), function (err) {
+                            if (err)
+                                console.log(err)
+                        };
+                        redisConnection.redisClient.rpush(redisUserKeyForComments, redisUserDataForComments), function (err) {
+                            if (err)
+                                console.log(err)
+                        };
+
                     }
                     userModel.findById(fileEntity['userid'], function (err, userEntity) {
                         if (err)
@@ -53,7 +71,7 @@ module.exports = {
                     })
 
                 });
-                redisConnection.redisClient.hmset(fileEntity['userid'], commentData);
+
                 console.log("评论成功")
                 res.status(201);
             }
@@ -102,7 +120,7 @@ module.exports = {
             if (err)
                 res.json(err);
 
-            dbHelper.pageQuery(pageIndex, pageSize, userModel, 'comments',
+            dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'comments',
                 '', '', function (error, $page) {
                     if (error)
                         res.json(error)
@@ -111,5 +129,25 @@ module.exports = {
                 })
         })
 
+    },
+
+    getUnviewedCommentList: function (req, res, next) {
+        var userid = req.params.id;
+        var pageIndex = req.query.pageIndex;
+        var pageSize = parseInt(req.query.pageSize);
+
+        redisConnection.redisClient.hgetall(userid, function (err, CommentList) {
+            if (err) {
+                console.log(err)
+                throw err;
+            }
+            console.log(CommentList)
+            res.json(CommentList);
+        })
+        // redisConnection.redisClient.hgetall(fileEntity["userid"], function(err, object) {
+        //     if(err)
+        //         console.log(err)
+        //     console.log(object);
+        // });
     }
 }

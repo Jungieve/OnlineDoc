@@ -126,7 +126,7 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 
-  /qiniu/persistent/file/{:id}:
+  /qiniu/persistent/file:
     put:
       summary: 转化文件为pdf
       produces:
@@ -134,8 +134,8 @@ paths:
       tags:
         - 七牛模块
       parameters:
-        - name: :id
-          in: path
+        - name: id
+          in: formData
           description: 需要转成pdf的文件id
           required: true
           type: string

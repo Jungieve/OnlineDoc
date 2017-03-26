@@ -6,6 +6,8 @@ var domainConfig = require('../configs/domain.json');
 var qiniuConfig = require('../configs/qiniu.json');
 var fileModel = mongoose.model('File');
 var userModel = mongoose.model('User');
+var redisConnection = require('../helpers/redisConnection')
+var request = require('request')
 //需要填写你的 Access Key 和 Secret Key
 qiniu.conf.ACCESS_KEY = qiniuConfig.accessKey;
 qiniu.conf.SECRET_KEY = qiniuConfig.secretKey;
@@ -82,7 +84,7 @@ module.exports = {
      * @param next
      */
     persistentFile: function (req, res, next) {
-        var fileid = req.params.id;
+        var fileid = req.body.id;
         var fileType = req.body.type;
         var fops = "yifangyun_preview/v2/ext=" + fileType;
         fileModel.findById(fileid, function (err, fileEntity) {
@@ -90,19 +92,19 @@ module.exports = {
                 console.log(err)
             else {
                 var opts = {
-                    notifyURL: domainConfig.domain + "/qiniu/persistent/" + fileEntity.key
+                    notifyURL: domainConfig.domain + "/qiniu/persistent/file"
                 }
                 qiniu.fop.pfop(bucket, fileEntity.key, fops, opts, function (err, ret) {
-                    if (!err) {
-                        // 上传成功， 处理返回值
-                        res.json({persistentId: ret.persistentId});
-                    } else {
-                        // 上传失败， 处理返回代码
-                        res.json(err);
+                    if (err) {
+                        res.json(err)
+                    }
+                    if (ret == null) {
+                        res.json({error: "error"});
                     }
                 })
             }
         })
+        res.end();
     },
 
     /**
@@ -115,15 +117,50 @@ module.exports = {
         var items = req.body.items;
         var code = items[0].code;
         var pdfKey = items[0].key;
+        // console.log(items[0])
+        query = {key: req.body.inputKey};
         if (code == 0) {
-            query = {key: req.body.inputKey};
-            fileModel.findOneAndUpdate(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, result) {
+            fileModel.findOneAndUpdate(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, fileEntity) {
                 if (err)
                     console.log(err)
-                else console.log("转成pdf回调结果为" + result)
+                else {
+                    console.log("转成pdf回调结果为" + fileEntity)
+                    var data = {
+                        code: code,
+                        fileId: fileEntity._id,
+                        userID: fileEntity.userid,
+                        pdfKey: pdfKey,
+                        fileKey: fileEntity.key
+                    }
+                    console.log("pdfKey" + pdfKey)
+                    redisConnection.redisClient.hmset(fileEntity._id.toString(), data)
+                    res.json(fileEntity).status(200);
+
+                }
             })
         }
-        res.end();
+        else {
+            fileModel.findOneAndRemove(query, function (err, fileEntity) {
+                if (err)
+                    console.log(err)
+                else {
+                    console.log("删除的结果为" + fileEntity)
+                    redisConnection.redisClient.hmset(fileEntity._id.toString(), {code: 3})
+                    res.json(fileEntity).status(204);
+                }
+            })
+        }
+    },
+    checkPersistentResult: function (req, res, next) {
+        var fileid = req.query.id;
+        redisConnection.redisClient.hgetall(fileid, function (err, body) {
+            if (err) {
+                console.log(err)
+                throw err
+            }
+            res.json(body);
+        });
+
     }
 }
 
