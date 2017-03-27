@@ -2,6 +2,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var dbHelper = require('../helpers/dbHelper')
 var fileModel = mongoose.model('File');
+var CommentModel = mongoose.model('Comment');
 module.exports = {
     /**
      * 分页获得用户文件列表
@@ -13,7 +14,7 @@ module.exports = {
         var userid = req.params.id;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        dbHelper.pageQuery(pageIndex, pageSize, fileModel, 'files', userid, {
+        dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', userid, {
             "create_at": 'desc'
         }, function (error, $page) {
             if (error)
@@ -49,9 +50,14 @@ module.exports = {
      */
     deleteFile: function (req, res, next) {
         var fileid = req.params.id;
-        fileModel.findByIdAndRemove(fileid, function (err, file) {
-            if (err)
+        fileModel.findById(fileid).exec(function (err, file) {
+            CommentModel.remove(file.comments, function (err) {
+                if (err)
+                    console.log(err)
+            })
+            if (err) {
                 res.json(err);
+            }
             else if (file == null || file == '') {
                 res.json({error: "Do not exist file"});
             }
@@ -61,5 +67,6 @@ module.exports = {
             }
         })
     }
+
 
 }

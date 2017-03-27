@@ -160,6 +160,7 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 
+
   /http://upload.qiniu.com/:
     get:
       summary: 上传文件

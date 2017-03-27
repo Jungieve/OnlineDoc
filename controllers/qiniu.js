@@ -6,6 +6,7 @@ var domainConfig = require('../configs/domain.json');
 var qiniuConfig = require('../configs/qiniu.json');
 var fileModel = mongoose.model('File');
 var userModel = mongoose.model('User');
+var CommentModel = mongoose.model('Comment');
 var redisConnection = require('../helpers/redisConnection')
 var request = require('request')
 //需要填写你的 Access Key 和 Secret Key
@@ -50,10 +51,6 @@ module.exports = {
                         res.json({error: "目标用户不存在"}).status(204);
                     }
                     else {
-                        console.log(userEntity)
-                        userEntity.files.push(file);
-                        userEntity.save();
-                        console.log('user表已经更新新的key');
                         if (fileEntity == null || fileEntity == '') {
                             console.log('根据key查询，文件不存在,尝试重新生成');
                             file.save();
@@ -89,7 +86,9 @@ module.exports = {
         var fops = "yifangyun_preview/v2/ext=" + fileType;
         fileModel.findById(fileid, function (err, fileEntity) {
             if (err)
-                console.log(err)
+                res.json(err)
+            else if (fileEntity == null || fileEntity == '')
+                res.json({error: "no such file"})
             else {
                 var opts = {
                     notifyURL: domainConfig.domain + "/qiniu/persistent/file"
@@ -101,10 +100,10 @@ module.exports = {
                     if (ret == null) {
                         res.json({error: "error"});
                     }
+                    else res.end();
                 })
             }
         })
-        res.end();
     },
 
     /**
@@ -117,7 +116,6 @@ module.exports = {
         var items = req.body.items;
         var code = items[0].code;
         var pdfKey = items[0].key;
-        // console.log(items[0])
         query = {key: req.body.inputKey};
         if (code == 0) {
             fileModel.findOneAndUpdate(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, fileEntity) {
@@ -134,18 +132,26 @@ module.exports = {
                     }
                     console.log("pdfKey" + pdfKey)
                     redisConnection.redisClient.hmset(fileEntity._id.toString(), data)
+                    redisConnection.redisClient.expire(fileEntity, 300)
                     res.json(fileEntity).status(200);
 
                 }
             })
         }
         else {
-            fileModel.findOneAndRemove(query, function (err, fileEntity) {
-                if (err)
-                    console.log(err)
+            fileModel.findOneAndRemove(query).exec(function (err, fileEntity) {
+                CommentModel.remove(fileEntity.comments, function (err) {
+                    if (err)
+                        console.log(err)
+                })
+                if (err) {
+                    res.json(err);
+                }
+
                 else {
                     console.log("删除的结果为" + fileEntity)
                     redisConnection.redisClient.hmset(fileEntity._id.toString(), {code: 3})
+                    redisConnection.redisClient.expire(fileEntity, 300)
                     res.json(fileEntity).status(204);
                 }
             })
