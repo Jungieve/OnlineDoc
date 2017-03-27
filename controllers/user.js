@@ -48,15 +48,16 @@ module.exports = {
      * @param next
      */
     deleteFile: function (req, res, next) {
-        var fileid = req.params.fileid;
+        var fileid = req.params.id;
         fileModel.findByIdAndRemove(fileid, function (err, file) {
             if (err)
                 res.json(err);
             else if (file == null || file == '') {
-                res.status(204).end();
+                res.json({error: "Do not exist file"});
             }
             else {
-                res.json(file).end();
+                console.log(file)
+                res.json(file);
             }
         })
     }
