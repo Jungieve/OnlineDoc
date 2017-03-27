@@ -10,7 +10,7 @@ var CommentItem = new Schema({
             return +new Date() + 8 * 60 * 60 * 1000
         }
     },
-    reply: {type: Schema.Types.ObjectId, ref: 'User'},
+    commentTo: {type: Schema.Types.ObjectId, ref: 'User'},
     // viewed: {type: Boolean, default: false}
 });
 

@@ -17,7 +17,7 @@ module.exports = {
         var index = req.params.index;
         var commenter = req.body.commenterid;
         var comment = req.body.comment;
-        userModel.findById(commenter, {files: 0, comments: 0}, function (err, commenterEntity) {
+        userModel.findById(commenter, function (err, commenterEntity) {
             if (err || commenterEntity == null || commenterEntity == '') {
                 console.log('根据openid查询，评论用户不存在')
                 res.status(404).end();
@@ -30,14 +30,6 @@ module.exports = {
                     fileid: fileid,
                 });
 
-                commentData.save(function (err, result) {
-                    if (err) {
-                        console.log('评论保存错误: ' + err)
-                    } else {
-                        console.log("保存的评论成功，结果为:" + result);
-                        res.json(result);
-                    }
-                });
                 fileModel.findById(fileid, function (err, fileEntity) {
                     if (err)
                         console.log(err)
@@ -46,6 +38,15 @@ module.exports = {
                         res.json({error: "找不到对应的评论文件"})
                     }
                     else {
+                        commentData.commentTo = fileEntity.userid;
+                        commentData.save(function (err, result) {
+                            if (err) {
+                                console.log('评论保存错误: ' + err)
+                            } else {
+                                console.log("保存的评论成功，结果为:" + result);
+                                res.json(result);
+                            }
+                        });
                         fileEntity.comments.push(commentData);
                         fileEntity.save();
                         var redisUserKeyForFiles = fileEntity.userid.toString() + "files";
@@ -62,13 +63,6 @@ module.exports = {
                         };
 
                     }
-                    userModel.findById(fileEntity['userid'], function (err, userEntity) {
-                        if (err)
-                            console.log(err)
-                        userEntity.comments.push(commentData);
-                        userEntity.save();
-                        console.log("评论保存时用户实体也进行了更新")
-                    })
 
                 });
 
@@ -116,18 +110,17 @@ module.exports = {
         var userid = req.params.id;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        userModel.findById(userid, function (err, userEntity) {
-            if (err)
-                res.json(err);
-
-            dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'comments',
-                '', '', function (error, $page) {
-                    if (error)
-                        res.json(error)
-                    else
-                        res.json($page)
-                })
-        })
+        dbHelper.pageQuery(pageIndex, pageSize, commentModel, '',
+            {
+                commentTo: userid
+            }, {
+                "create_at": 'desc'
+            }, function (error, $page) {
+                if (error)
+                    res.json(error)
+                else
+                    res.json($page)
+            })
 
     },
 
