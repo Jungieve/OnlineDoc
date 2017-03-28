@@ -38,29 +38,26 @@ module.exports = {
                         res.json({error: "找不到对应的评论文件"})
                     }
                     else {
+                        fileEntity.comments.push(commentData);
+                        fileEntity.save();
+                        redisConnection.redisClient.sadd(fileEntity.userid.toString() + "files", fileEntity["_id"].toString()), function (err) {
+                            if (err)
+                                console.log(err)
+                        };
                         commentData.commentTo = fileEntity.userid;
-                        commentData.save(function (err, result) {
+                        commentData.save(function (err, commentEntity) {
                             if (err) {
                                 console.log('评论保存错误: ' + err)
                             } else {
-                                console.log("保存的评论成功，结果为:" + result);
-                                res.json(result);
+                                redisConnection.redisClient.sadd(fileEntity.userid.toString() + "comments", commentEntity._id.toString()), function (err) {
+                                    if (err)
+                                        console.log(err)
+                                };
+                                console.log("保存的评论成功，结果为:" + commentEntity);
+                                res.json(commentEntity);
                             }
                         });
-                        fileEntity.comments.push(commentData);
-                        fileEntity.save();
-                        var redisUserKeyForFiles = fileEntity.userid.toString() + "files";
-                        var redisUserKeyForComments = fileEntity.userid.toString() + "comments";
-                        var redisUserDataForComments = {};
-                        redisUserDataForComments[fileEntity.userid] = (commentData);
-                        redisConnection.redisClient.sadd(redisUserKeyForFiles, fileEntity["_id"].toString()), function (err) {
-                            if (err)
-                                console.log(err)
-                        };
-                        redisConnection.redisClient.rpush(redisUserKeyForComments, redisUserDataForComments), function (err) {
-                            if (err)
-                                console.log(err)
-                        };
+
 
                     }
 
@@ -129,18 +126,53 @@ module.exports = {
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
 
-        redisConnection.redisClient.hgetall(userid, function (err, CommentList) {
+        redisConnection.redisClient.smembers(userid + 'comments', function (err, commentList) {
             if (err) {
                 console.log(err)
                 throw err;
             }
-            console.log(CommentList)
-            res.json(CommentList);
+            console.log("commentList" + commentList)
+            dbHelper.pageQuery(pageIndex, pageSize, commentModel, '', {_id: commentList}, {
+                    "create_at": 'desc'
+                }
+                , function (error, $page) {
+                    if (error)
+                        res.json(error)
+                    else
+                        res.json($page)
+                })
         })
-        // redisConnection.redisClient.hgetall(fileEntity["userid"], function(err, object) {
-        //     if(err)
-        //         console.log(err)
-        //     console.log(object);
-        // });
+    },
+
+    markUnviewedComment: function (req, res, next) {
+        var commentId = req.params.id;
+        commentModel.findById(commentId, function (err, CommentEntity) {
+            var userid = CommentEntity.commentTo;
+            var fileid = CommentEntity.fileid;
+            redisConnection.redisClient.srem(userid + 'fileid', fileid.toString(), function (err, result) {
+                if (err) {
+                    console.log(err)
+                }
+                else {
+                    if (result == 0)
+                        console.log("没有相应的文件提醒被删除")
+                    else {
+                        console.log("删除对应的文件提醒" + fileid)
+                    }
+                }
+            })
+            redisConnection.redisClient.srem(userid + 'comments', commentId.toString(), function (err, result) {
+                if (err) {
+                    console.log(err)
+                }
+                else {
+                    if (result == 0)
+                        res.json({error: "该评论已经被标记已读"}).status(204)
+                    else {
+                        res.json(CommentEntity)
+                    }
+                }
+            })
+        })
     }
 }

@@ -118,7 +118,7 @@ paths:
           schema:
             type: object
             properties:
-              uptoken:
+              token:
                 type: string
                 description: 七牛云上传token
         '500':
@@ -126,7 +126,7 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 
-  /qiniu/persistent/file:
+  /qiniu/persistent/file/{:id}:
     put:
       summary: 转化文件为pdf
       produces:
@@ -134,8 +134,8 @@ paths:
       tags:
         - 七牛模块
       parameters:
-        - name: id
-          in: formData
+        - name: :id
+          in: path
           description: 需要转成pdf的文件id
           required: true
           type: string
@@ -159,7 +159,6 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-
 
   /http://upload.qiniu.com/:
     get:
@@ -287,7 +286,7 @@ paths:
 
   /comments/file/{:id}/{:index}/list:
     get:
-      summary: 分页查看评论
+      summary: 查看文件评论
       description: 针对某文件的某一页分页查看全部评论
       produces:
         - application/json
@@ -340,8 +339,8 @@ paths:
 
   /comments/user/{:id}/list:
     get:
-      summary: 分页查看评论
-      description: 针对某文件的某一页分页查看全部评论
+      summary: 查看用户评论
+      description: 分页查看用户的全部评论（包括已读评论和未读评论）
       produces:
         - application/json
       tags:
@@ -376,9 +375,95 @@ paths:
                 type: number
                 description: 文件的页数
               result:
-                $ref: '#/definitions/wechat'
+                $ref: '#/definitions/comment'
         '404':
           description: 找不到对应的评论人/回复人的openid
+          schema:
+            $ref: '#/definitions/errorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+  /comments/user/{:id}/unviewed/list:
+    get:
+      summary: 查看用户未读评论
+      description: 针对某用户查看分页查看它所有的评论
+      produces:
+        - application/json
+      tags:
+        - 评论模块
+      parameters:
+        - name: :id
+          in: path
+          required: true
+          description: 要查看的用户id
+          type: string
+          format: string
+        - name: pageIndex
+          in: query
+          required: false
+          description: 分页索引
+          type: number
+        - name: pageSize
+          in: query
+          required: false
+          description: 分页尺寸
+          type: number
+      responses:
+        '200':
+          description: 成功查看未读评论内容
+          schema:
+            type: object
+            properties:
+              pageNumber:
+                type: number
+                description: 文件的当前索引
+              pageCount:
+                type: number
+                description: 文件的页数
+              result:
+                $ref: '#/definitions/comment'
+        '404':
+          description: 找不到对应的评论人/回复人的openid
+          schema:
+            $ref: '#/definitions/errorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+  /comments/{:id}/viewed:
+    delete:
+      summary: 标记评论已读
+      description: 针对某未读评论标志为“已读”
+      produces:
+        - application/json
+      tags:
+        - 评论模块
+      parameters:
+        - name: :id
+          in: path
+          required: true
+          description: 标记的评论id
+          type: string
+          format: string
+      responses:
+        '200':
+          description: 成功查看已经标记的评论内容
+          schema:
+            type: object
+            properties:
+              pageNumber:
+                type: number
+                description: 文件的当前索引
+              pageCount:
+                type: number
+                description: 文件的页数
+              result:
+                $ref: '#/definitions/comment'
+        '204':
+          description: 找不到对应的评论id
           schema:
             $ref: '#/definitions/errorModel'
         '500':
@@ -510,6 +595,11 @@ definitions:
         description: 评论时间
       commenter:
         type: string
+        description: 评论发起人所对应的微信信息（id 昵称 头像）
+        $ref: '#/definitions/wechat'
+      commentTo:
+        type: string
+        description: 评论接受人所对应的微信信息（id 昵称 头像）
         $ref: '#/definitions/wechat'
   errorModel:
     type: object

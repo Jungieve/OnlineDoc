@@ -10,6 +10,9 @@ router.get('/file/:id/:index/list', commentController.getCommentListByPage);
 //分页获取某个用户所拥有的评论列表
 router.get('/user/:id/list', commentController.getUserCommentListByPage);
 
-//分页获取某个用户所拥有的评论列表
+//分页获取某个用户所拥有的未读评论列表
 router.get('/user/:id/unviewed/list', commentController.getUnviewedCommentList);
+
+//标记某个评论为已读
+router.delete('/:id/viewed', commentController.markUnviewedComment);
 module.exports = router;
