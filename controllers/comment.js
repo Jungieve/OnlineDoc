@@ -5,6 +5,8 @@ var redisConnection = require('../helpers/redisConnection')
 var userModel = mongoose.model('User');
 var fileModel = mongoose.model('File');
 var commentModel = mongoose.model('Comment')
+
+
 module.exports = {
     /**
      * 页码新增评论
@@ -149,7 +151,7 @@ module.exports = {
         commentModel.findById(commentId, function (err, CommentEntity) {
             var userid = CommentEntity.commentTo;
             var fileid = CommentEntity.fileid;
-            redisConnection.redisClient.srem(userid + 'fileid', fileid.toString(), function (err, result) {
+            redisConnection.redisClient.srem(userid + 'files', fileid.toString(), function (err, result) {
                 if (err) {
                     console.log(err)
                 }
@@ -161,7 +163,7 @@ module.exports = {
                     }
                 }
             })
-            redisConnection.redisClient.srem(userid + 'comments', commentId.toString(), function (err, result) {
+            redisConnection.redisClient.smembers(userid + 'comments', commentId.toString(), function (err, result) {
                 if (err) {
                     console.log(err)
                 }
