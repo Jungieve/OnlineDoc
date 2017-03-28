@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var dbHelper = require('../helpers/dbHelper')
 var fileModel = mongoose.model('File');
 var CommentModel = mongoose.model('Comment');
+var UserModel = mongoose.model('User');
 module.exports = {
     /**
      * 分页获得用户文件列表
@@ -50,7 +51,7 @@ module.exports = {
      */
     deleteFile: function (req, res, next) {
         var fileid = req.params.id;
-        fileModel.findById(fileid).exec(function (err, file) {
+        fileModel.findByIdAndRemove(fileid).exec(function (err, file) {
             CommentModel.remove(file.comments, function (err) {
                 if (err)
                     console.log(err)

@@ -40,7 +40,7 @@ app.use('/qiniu', qiniu);
 app.use('/files', file);
 app.use('/comments', comment);
 app.use('/qrcodes', qrcode);
-app.use('/pushs', qrcode);
+app.use('/pushs', push);
 
 
 // catch 404 and forward to error handler

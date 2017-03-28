@@ -126,7 +126,7 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 
-  /qiniu/persistent/file/{:id}:
+  /qiniu/persistent/file:
     put:
       summary: 转化文件为pdf
       produces:
@@ -134,8 +134,8 @@ paths:
       tags:
         - 七牛模块
       parameters:
-        - name: :id
-          in: path
+        - name: id
+          in: formData
           description: 需要转成pdf的文件id
           required: true
           type: string
@@ -150,11 +150,32 @@ paths:
         '200':
           description: 成功进行转化并返回文件模型
           schema:
-            type: object
-            properties:
-              persistentId:
-                type: string
-                description: 持久化id,具体操作见七牛文档“https://developer.qiniu.com/dora/api/persistent-processing-status-query-prefop”
+            $ref: '#/definitions/file'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+    get:
+      summary: 查询转化文件结果
+      description: 查询文件转化结果，详情code见七牛，有效时间5分钟，如过期视为失败。
+      produces:
+        - application/json
+      tags:
+        - 七牛模块
+      parameters:
+        - name: id
+          in: query
+          description: 需要查询pdf的文件id
+          required: true
+          type: string
+          format: string
+
+      responses:
+        '200':
+          description: 成功查询得到转化结果
+          schema:
+            $ref: '#/definitions/file'
         '500':
           description: unexpected error
           schema:
@@ -469,6 +490,33 @@ paths:
         '500':
           description: unexpected error
           schema:
+            type: array
+            items: {
+
+            }
+
+  /pushs/subscriber/{:id}/unviewed/files:
+    get:
+      summary: 推送未读文件列表
+      produces:
+        - application/json
+      tags:
+        - 推送模块
+      parameters:
+        - name: :id
+          in: path
+          required: true
+          description: 用户id
+          type: string
+          format: string
+      responses:
+        '200':
+          description: 用户未读的文件列表（id列表）
+          schema:
+             $ref: '#/definitions/wechatList'
+        '500':
+          description: unexpected error
+          schema:
             $ref: '#/definitions/errorModel'
 
 definitions:
@@ -594,12 +642,8 @@ definitions:
         type: string
         description: 评论时间
       commenter:
-        type: string
-        description: 评论发起人所对应的微信信息（id 昵称 头像）
         $ref: '#/definitions/wechat'
       commentTo:
-        type: string
-        description: 评论接受人所对应的微信信息（id 昵称 头像）
         $ref: '#/definitions/wechat'
   errorModel:
     type: object

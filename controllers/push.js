@@ -14,6 +14,7 @@ module.exports = {
             socketConnection.setSocketEmit(userid, msg);
             console.log('推送的未读文件为' + msg);
         })
+        res.json({"code": 0})
     },
     emitUnviewedCommentsNumber: function (req, res, next) {
         var userid = req.params.id;

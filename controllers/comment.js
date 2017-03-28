@@ -40,8 +40,6 @@ module.exports = {
                         res.json({error: "找不到对应的评论文件"})
                     }
                     else {
-                        fileEntity.comments.push(commentData);
-                        fileEntity.save();
                         redisConnection.redisClient.sadd(fileEntity.userid.toString() + "files", fileEntity["_id"].toString()), function (err) {
                             if (err)
                                 console.log(err)
@@ -149,21 +147,13 @@ module.exports = {
     markUnviewedComment: function (req, res, next) {
         var commentId = req.params.id;
         commentModel.findById(commentId, function (err, CommentEntity) {
+            if (err)
+                console.log(err)
+            if (CommentEntity == null)
+                res.json({error: "找不到对应评论"})
+            console.log(CommentEntity)
             var userid = CommentEntity.commentTo;
-            var fileid = CommentEntity.fileid;
-            redisConnection.redisClient.srem(userid + 'files', fileid.toString(), function (err, result) {
-                if (err) {
-                    console.log(err)
-                }
-                else {
-                    if (result == 0)
-                        console.log("没有相应的文件提醒被删除")
-                    else {
-                        console.log("删除对应的文件提醒" + fileid)
-                    }
-                }
-            })
-            redisConnection.redisClient.smembers(userid + 'comments', commentId.toString(), function (err, result) {
+            redisConnection.redisClient.srem(userid + 'comments', commentId.toString(), function (err, result) {
                 if (err) {
                     console.log(err)
                 }
@@ -171,10 +161,12 @@ module.exports = {
                     if (result == 0)
                         res.json({error: "该评论已经被标记已读"}).status(204)
                     else {
+                        console.log("删除对应的评论提醒" + commentId)
                         res.json(CommentEntity)
                     }
                 }
             })
+
         })
     }
 }

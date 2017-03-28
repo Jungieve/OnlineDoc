@@ -132,7 +132,6 @@ module.exports = {
                     }
                     console.log("pdfKey" + pdfKey)
                     redisConnection.redisClient.hmset(fileEntity._id.toString(), data)
-                    redisConnection.redisClient.expire(fileEntity, 300)
                     res.json(fileEntity).status(200);
 
                 }
@@ -151,7 +150,6 @@ module.exports = {
                 else {
                     console.log("删除的结果为" + fileEntity)
                     redisConnection.redisClient.hmset(fileEntity._id.toString(), {code: 3})
-                    redisConnection.redisClient.expire(fileEntity, 300)
                     res.json(fileEntity).status(204);
                 }
             })

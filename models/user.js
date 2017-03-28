@@ -4,8 +4,7 @@ var Schema = mongoose.Schema;
 var UserItem = new Schema({
     openid: {type:String,unique:true},
     nickname: String,
-    headimgurl: String,
-    comments: [{type: Schema.Types.ObjectId, ref: 'Comment'}]
+    headimgurl: String
 });
 
 module.exports = mongoose.model('User',UserItem);

@@ -15,8 +15,7 @@ var FileItem = new Schema({
         type: Date, default: function () {
             return +new Date() + 8 * 60 * 60 * 1000
         }
-    },
-    comments: [{type: Schema.Types.ObjectId, ref: 'Comment'}]
+    }
 });
 
 
