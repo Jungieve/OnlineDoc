@@ -36,7 +36,7 @@ module.exports = {
             if (err)
                 res.json(err)
             else if (file == null || file == '') {
-                res.status(404).end()
+                res.json({error: "找不到该文件"}).status(404).end()
             }
             else {
                 res.json(file)
@@ -52,10 +52,7 @@ module.exports = {
     deleteFile: function (req, res, next) {
         var fileid = req.params.id;
         fileModel.findByIdAndRemove(fileid).exec(function (err, file) {
-            CommentModel.remove(file.comments, function (err) {
-                if (err)
-                    console.log(err)
-            })
+
             if (err) {
                 res.json(err);
             }
@@ -64,6 +61,25 @@ module.exports = {
             }
             else {
                 console.log(file)
+                // 删除对应的评论
+                CommentModel.remove({fileid: fileid}, function (err, comment) {
+                    if (err)
+                        console.log(err)
+
+                })
+                // 删除对应的redis comment
+                redisConnection.redisClient.srem(userid + 'files', fileid.toString(), function (err, result) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    else {
+                        if (result == 0)
+                            console.log("该文件所在redis已经被标记清除");
+                        else {
+                            console.log("该文件所在redis没有被清除");
+                        }
+                    }
+                })
                 res.json(file);
             }
         })
