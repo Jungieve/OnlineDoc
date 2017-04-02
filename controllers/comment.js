@@ -22,7 +22,7 @@ module.exports = {
         userModel.findById(commenter, function (err, commenterEntity) {
             if (err || commenterEntity == null || commenterEntity == '') {
                 console.log('根据openid查询，评论用户不存在')
-                res.status(404).end();
+                res.json({error: "评论用户不存在"})
             }
             else {
                 var commentData = new commentModel({
@@ -54,6 +54,7 @@ module.exports = {
                                         console.log(err)
                                 };
                                 console.log("保存的评论成功，结果为:" + commentEntity);
+                                commentEntity.code = 0;
                                 res.json(commentEntity);
                             }
                         });
@@ -107,7 +108,7 @@ module.exports = {
         var userid = req.params.id;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        dbHelper.pageQuery(pageIndex, pageSize, commentModel, '',
+        dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'commenter',
             {
                 commentTo: userid
             }, {
