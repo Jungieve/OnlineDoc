@@ -519,6 +519,28 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 
+  /pushs/subscriber/{:id}/comments/count:
+    get:
+      summary: 推送未读评论数量
+      produces:
+        - application/json
+      tags:
+        - 推送模块
+      parameters:
+        - name: :id
+          in: path
+          required: true
+          description: 用户id
+          type: string
+          format: string
+      responses:
+        '200':
+          description: 用户未读评论数量
+
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
 definitions:
   file:
     type: object
