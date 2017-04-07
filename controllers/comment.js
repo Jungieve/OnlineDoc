@@ -108,7 +108,7 @@ module.exports = {
         var userid = req.params.id;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'commenter',
+        dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'commenter fileid',
             {
                 commentTo: userid
             }, {

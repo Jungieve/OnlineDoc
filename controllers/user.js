@@ -4,6 +4,7 @@ var dbHelper = require('../helpers/dbHelper')
 var fileModel = mongoose.model('File');
 var CommentModel = mongoose.model('Comment');
 var UserModel = mongoose.model('User');
+var redisConnection = require('../helpers/redisConnection')
 module.exports = {
     /**
      * 分页获得用户文件列表
@@ -68,7 +69,7 @@ module.exports = {
 
                 })
                 // 删除对应的redis comment
-                redisConnection.redisClient.srem(userid + 'files', fileid.toString(), function (err, result) {
+                redisConnection.redisClient.srem(file.userid + 'files', fileid.toString(), function (err, result) {
                     if (err) {
                         console.log(err)
                     }
