@@ -6,6 +6,12 @@ var oauthController = require('../controllers/wechat');
  * 微信授权并获取用户信息
  */
 router.get('/authorized/userinfo', oauthController.getAuthorizedUserInfo);
+
+/**
+ * 静默授权并获取用户信息（可能部分）
+ */
+router.get('/authorized/weblogin', oauthController.getAuthorizedForWebsite);
+
 /**
  * 静默授权并获取用户信息（可能部分）
  */
