@@ -18,13 +18,14 @@ module.exports = {
     },
     emitUnviewedCommentsNumber: function (req, res, next) {
         var userid = req.params.id;
-        redisConnection.redisClient.scad(userid + 'comments', function (err, msg) {
+        redisConnection.redisClient.scard(userid + 'comments', function (err, msg) {
             if (err) {
                 console.log(err)
             }
             socketConnection.setSocketEmit(userid, msg);
             console.log('推送的评论数量' + msg);
         })
+        res.json({"code": 0})
     }
 
 }

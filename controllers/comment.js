@@ -148,26 +148,26 @@ module.exports = {
     markUnviewedComment: function (req, res, next) {
         var commentId = req.params.id;
         commentModel.findById(commentId, function (err, CommentEntity) {
-            if (err)
-                console.log(err)
-            if (CommentEntity == null)
-                res.json({error: "找不到对应评论"})
-            console.log(CommentEntity)
-            var userid = CommentEntity.commentTo;
-            redisConnection.redisClient.srem(userid + 'comments', commentId.toString(), function (err, result) {
-                if (err) {
-                    console.log(err)
-                }
-                else {
-                    if (result == 0)
-                        res.json({error: "该评论已经被标记已读"}).status(204)
-                    else {
-                        console.log("删除对应的评论提醒" + commentId)
-                        res.json(CommentEntity)
+            if (err || CommentEntity == null) {
+                res.json({error: "找不到对应评论id"})
+            }
+            else {
+                console.log("要清除标记的评论为:"+CommentEntity)
+                var userid = CommentEntity.commentTo;
+                redisConnection.redisClient.srem(userid + 'comments', commentId.toString(), function (err, result) {
+                    if (err) {
+                        console.log(err)
                     }
-                }
-            })
-
+                    else {
+                        if (result == 0)
+                            res.json({error: "该评论已经被标记已读"}).status(204)
+                        else {
+                            console.log("删除对应的评论提醒" + commentId)
+                            res.json(CommentEntity)
+                        }
+                    }
+                })
+            }
         })
     }
 }

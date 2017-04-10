@@ -519,7 +519,7 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 
-  /pushs/subscriber/{:id}/comments/count:
+  /pushs/subscriber/{:id}/unviewed/comments/count:
     get:
       summary: 推送未读评论数量
       produces:
