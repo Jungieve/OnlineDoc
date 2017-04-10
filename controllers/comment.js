@@ -150,50 +150,13 @@ module.exports = {
         commentModel.findById(commentId, function (err, CommentEntity) {
             if (err)
                 console.log(err)
-            if (CommentEntity == null)
-                res.json({error: "找不到对应评论"})
-            console.log(CommentEntity)
-            var userid = CommentEntity.commentTo;
-            redisConnection.redisClient.srem(userid + 'comments', commentId.toString(), function (err, result) {
-                if (err) {
-                    console.log(err)
-                }
-                else {
-                    if (result == 0)
-                        res.json({error: "该评论已经被标记已读"}).status(204)
-                    else {
-                        console.log("删除对应的评论提醒" + commentId)
-                        //检查是否还有其他对该文件的未读
-                        commentModel.find({fileid: commentId.fileid}, function (err, CommentEntities) {
-                            if (err)
-                                console.log(err)
-                            else if (CommentEntities == null) {
-                                console.log("这个文件产生的新评论已经全部没有了")
-                                redisConnection.redisClient.srem(userid + 'files', userid.toString(), function (err, result) {
-                                    if (err) {
-                                        console.log(err)
-                                    }
-                                    else {
-                                        if (result == 0)
-                                            console.log("没有相关对应要删除的文件")
-                                        else (result == 1)
-                                        console.log("要删除的对应文件:" + userid)
-                                        console.log()
-                                    }
-                                })
-                            }
-                            else
-                                console.log("还有对这个文件的其他新评论");
-                        })
-                        res.json(CommentEntity)
-                    }
-                }
-            })
-            if (err || CommentEntity == null) {
+
+            else if (err || CommentEntity == null) {
                 res.json({error: "找不到对应评论id"})
             }
+
             else {
-                console.log("要清除标记的评论为:"+CommentEntity)
+                console.log("要清除标记的评论为:" + CommentEntity)
                 var userid = CommentEntity.commentTo;
                 redisConnection.redisClient.srem(userid + 'comments', commentId.toString(), function (err, result) {
                     if (err) {
@@ -204,12 +167,36 @@ module.exports = {
                             res.json({error: "该评论已经被标记已读"}).status(204)
                         else {
                             console.log("删除对应的评论提醒" + commentId)
+                            //检查是否还有其他对该文件的未读
+                            commentModel.find({fileid: commentId.fileid}, function (err, CommentEntities) {
+                                if (err)
+                                    console.log(err)
+                                else if (CommentEntities == null) {
+                                    console.log("这个文件产生的新评论已经全部没有了")
+                                    redisConnection.redisClient.srem(userid + 'files', userid.toString(), function (err, result) {
+                                        if (err) {
+                                            console.log(err)
+                                        }
+                                        else {
+                                            if (result == 0)
+                                                console.log("没有相关对应要删除的文件")
+                                            else (result == 1)
+                                            console.log("要删除的对应文件:" + userid)
+                                            console.log()
+                                        }
+                                    })
+                                }
+                                else
+                                    console.log("还有对这个文件的其他新评论");
+                            })
                             res.json(CommentEntity)
                         }
                     }
                 })
             }
         })
+
+
     },
     /**
      * 查看某个用户对该用户发起的评论
