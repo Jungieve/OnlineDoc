@@ -406,6 +406,69 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 
+  /comments/user/{:id}/by/commenter/{:commenterid}/list:
+    get:
+      summary: 查看某个下点击某用户产生的对本人发起的评论
+      description: 分页查看该用户下，某个其他的评论人对自己发起的全部评论，可以支持按照时间范围筛选。
+      produces:
+        - application/json
+      tags:
+        - 评论模块
+      parameters:
+        - name: :id
+          in: path
+          required: true
+          description: 要查看的用户id
+          type: string
+          format: string
+        - name: :commenterid
+          in: path
+          required: true
+          description: 该用户所属的某个评论人id
+          type: number
+        - name: pageIndex
+          in: query
+          required: false
+          description: 分页索引
+          type: number
+        - name: pageSize
+          in: query
+          required: false
+          description: 分页尺寸
+          type: number
+        - name: begindate
+          in: query
+          required: false
+          description: 查询开始时间
+          type: number
+        - name: enddate
+          in: query
+          required: false
+          description: 查询结束时间
+          type: number
+      responses:
+        '200':
+          description: 成功查看该用户评论
+          schema:
+            type: object
+            properties:
+              pageNumber:
+                type: number
+                description: 文件的当前索引
+              pageCount:
+                type: number
+                description: 文件的页数
+              result:
+                $ref: '#/definitions/comment'
+        '404':
+          description: 找不到对应的评论人/回复人的openid
+          schema:
+            $ref: '#/definitions/errorModel'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
   /comments/user/{:id}/unviewed/list:
     get:
       summary: 查看用户未读评论
@@ -519,7 +582,7 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 
-  /pushs/subscriber/{:id}/unviewed/comments/count:
+  /pushs/subscriber/{:id}/comments/count:
     get:
       summary: 推送未读评论数量
       produces:

@@ -198,15 +198,25 @@ module.exports = {
     getUserCommentListAtCertainCommenterByPage: function (req, res, next) {
         var userid = req.params.id;
         var commenterid = req.params.commenterid;
+        var begindate = req.query.begindate || '1970-01-01';
+        var enddate = req.query.enddate || '2038-01-01';
+        var pageIndex = req.query.pageIndex;
+        var pageSize = parseInt(req.query.pageSize);
+        console.log(begindate)
+        console.log(enddate)
         dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'commenter fileid',
             {
                 commenter: commenterid,
-                commentTo: userid
+                commentTo: userid,
+                create_at: {"$gte": new Date(begindate), "$lte": new Date(enddate)}
             }, {
                 "create_at": 'desc'
             }, function (error, $page) {
-                if (error)
-                    res.json(error)
+                if (error) {
+                    console.log(error)
+                    res.json({error: "错误的查询条件"})
+                }
+
                 else
                     res.json($page)
             })
