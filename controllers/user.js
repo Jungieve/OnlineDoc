@@ -55,7 +55,8 @@ module.exports = {
         fileModel.findByIdAndRemove(fileid).exec(function (err, file) {
 
             if (err) {
-                res.json(err);
+                console.log(err);
+                res.json({error: "critical error"});
             }
             else if (file == null || file == '') {
                 res.json({error: "Do not exist file"});
