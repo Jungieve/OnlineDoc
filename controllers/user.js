@@ -3,8 +3,9 @@ var mongoose = require('mongoose');
 var dbHelper = require('../helpers/dbHelper')
 var fileModel = mongoose.model('File');
 var CommentModel = mongoose.model('Comment');
-var UserModel = mongoose.model('User');
 var redisConnection = require('../helpers/redisConnection')
+
+var wechat = require('wechat')
 module.exports = {
     /**
      * 分页获得用户文件列表
@@ -12,7 +13,7 @@ module.exports = {
      * @param res
      * @param next
      */
-    getUserFileListByPage: function (req, res, next) {
+      getUserFileListByPage: function (req, res, next) {
         var userid = req.params.id;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
