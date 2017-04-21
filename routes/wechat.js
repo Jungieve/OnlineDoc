@@ -8,17 +8,13 @@ router.get('/checkSignature', oauthController.checkSignature);
 /**
  * 微信授权并获取用户信息
  */
-router.get('/wechat/userinfo', oauthController.getAuthorizedUserInfo);
+router.get('/wechat/user', oauthController.getAuthorizedForWechat);
 
 /**
  * 静默授权并获取用户信息（可能部分）
  */
-router.get('/web/userinfo', oauthController.getAuthorizedForWebsite);
+router.get('/web/user', oauthController.getAuthorizedForWebsite);
 
-/**
- * 静默授权并获取用户信息（可能部分）
- */
-router.get('/wechat/base', oauthController.getAuthorizedBase);
 /**
  * 微信回调方法
  */

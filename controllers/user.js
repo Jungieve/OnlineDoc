@@ -7,6 +7,7 @@ var redisConnection = require('../helpers/redisConnection')
 
 var wechat = require('wechat')
 module.exports = {
+
     /**
      * 分页获得用户文件列表
      * @param req
