@@ -22,7 +22,7 @@ router.get('/wechat/base', oauthController.getAuthorizedBase);
 /**
  * 微信回调方法
  */
-router.get('/callback', oauthController.authorizeCallback);
+router.get('/wechat/callback', oauthController.authorizeCallback);
 
 /**
  * 微信网页回调方法

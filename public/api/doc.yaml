@@ -11,7 +11,7 @@ info:
   license:
     name: MIT
     url: http://opensource.org/licenses/MIT
-host: jungieve.s1.natapp.cc
+host: www.filescloud.cn
 basePath: /
 schemes:
   - http
@@ -227,7 +227,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-  /wechat/authorized/userinfo:
+  /oauth/wechat/userinfo:
     get:
       summary: 移动端微信授权认证
       produces:
@@ -235,15 +235,31 @@ paths:
       tags:
         - 微信模块
       responses:
-        '301':
-          description: 永久重定向到授权页，用户点击授权获取微信信息（不支持pc web调用，建议使用微信开发者工具）
+        '302':
+          description: 永久重定向到授权页，用户点击授权获取微信信息（不支持pc web调用，建议使用微信开发者工具）,官方文档:https://mp.weixin.qq.com/wiki/4/9ac2e7b1f1d22e9e57260f6553822520.html
           schema:
              $ref: '#/definitions/wechatList'
         '500':
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-  /wechat/authorized/base:
+  /oauth/web/userinfo:
+    get:
+      summary: 移动端pc 扫码认证
+      produces:
+        - application/json
+      tags:
+        - 微信模块
+      responses:
+        '302':
+          description: 永久重定向到扫码页面，重定向后可以直接获取二维码页面，官方文档:https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1419316505&token=&lang=zh_CN
+          schema:
+             $ref: '#/definitions/wechatList'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /oauth/wechat/base:
     get:
       summary: 微信静默获取openid
       produces:
@@ -251,7 +267,7 @@ paths:
       tags:
         - 微信模块
       responses:
-        '301':
+        '200':
           description: 永久重定向并静默授权，针对已授权的用户可以返回_id,openid,nickname及headimgurl等信息，对未授权的用户只能获取openid;请保证调用前用户已经通过/authrozied/userinfo进行授权认证。
           schema:
              $ref: '#/definitions/wechatList'
@@ -406,69 +422,6 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 
-  /comments/user/{:id}/by/commenter/{:commenterid}/list:
-    get:
-      summary: 查看某个下点击某用户产生的对本人发起的评论
-      description: 分页查看该用户下，某个其他的评论人对自己发起的全部评论，可以支持按照时间范围筛选。
-      produces:
-        - application/json
-      tags:
-        - 评论模块
-      parameters:
-        - name: :id
-          in: path
-          required: true
-          description: 要查看的用户id
-          type: string
-          format: string
-        - name: :commenterid
-          in: path
-          required: true
-          description: 该用户所属的某个评论人id
-          type: number
-        - name: pageIndex
-          in: query
-          required: false
-          description: 分页索引
-          type: number
-        - name: pageSize
-          in: query
-          required: false
-          description: 分页尺寸
-          type: number
-        - name: begindate
-          in: query
-          required: false
-          description: 查询开始时间
-          type: number
-        - name: enddate
-          in: query
-          required: false
-          description: 查询结束时间
-          type: number
-      responses:
-        '200':
-          description: 成功查看该用户评论
-          schema:
-            type: object
-            properties:
-              pageNumber:
-                type: number
-                description: 文件的当前索引
-              pageCount:
-                type: number
-                description: 文件的页数
-              result:
-                $ref: '#/definitions/comment'
-        '404':
-          description: 找不到对应的评论人/回复人的openid
-          schema:
-            $ref: '#/definitions/errorModel'
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/errorModel'
-
   /comments/user/{:id}/unviewed/list:
     get:
       summary: 查看用户未读评论
@@ -582,28 +535,6 @@ paths:
           schema:
             $ref: '#/definitions/errorModel'
 
-  /pushs/subscriber/{:id}/comments/count:
-    get:
-      summary: 推送未读评论数量
-      produces:
-        - application/json
-      tags:
-        - 推送模块
-      parameters:
-        - name: :id
-          in: path
-          required: true
-          description: 用户id
-          type: string
-          format: string
-      responses:
-        '200':
-          description: 用户未读评论数量
-
-        '500':
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/errorModel'
 definitions:
   file:
     type: object
