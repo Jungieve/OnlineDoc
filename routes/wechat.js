@@ -16,6 +16,11 @@ router.get('/wechat/user', oauthController.getAuthorizedForWechat);
 router.get('/web/user', oauthController.getAuthorizedForWebsite);
 
 /**
+ * 根据id获取信息
+ */
+router.get('/:id', oauthController.getUserInfoById);
+
+/**
  * 微信回调方法
  */
 router.get('/wechat/callback', oauthController.authorizeCallback);

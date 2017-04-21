@@ -227,7 +227,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-  /oauth/wechat/user:
+  /oauth/wechat/userinfo:
     get:
       summary: 移动端微信授权认证
       produces:
@@ -253,6 +253,22 @@ paths:
       responses:
         '302':
           description: 永久重定向到扫码页面，重定向后可以直接获取二维码页面，官方文档:https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1419316505&token=&lang=zh_CN
+          schema:
+             $ref: '#/definitions/wechatList'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /oauth/:id:
+    get:
+      summary: 根据id获取微信信息
+      produces:
+        - application/json
+      tags:
+        - 微信模块
+      responses:
+        '200':
+          description: 获取用户id信息
           schema:
              $ref: '#/definitions/wechatList'
         '500':

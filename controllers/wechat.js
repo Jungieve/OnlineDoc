@@ -39,6 +39,24 @@ module.exports = {
         var url = clientForWeb.getAuthorizeURLForWebsite(redirectUrl, 'web', 'snsapi_login');
         res.redirect(url)
     },
+
+    /**
+     * 根据id查询用户信息
+     * @param req
+     * @param res
+     * @param next
+     */
+    getUserInfoById: function (req, res, next) {
+        var userid = req.params.id;
+        userModel.findById(userid, function (err, userEntity) {
+            if (err)
+                res.json({error: "no such user"})
+            res.json(userEntity);
+        })
+
+    },
+
+
     /**
      * 认证授权的回调函数
      * @param req
@@ -86,8 +104,12 @@ module.exports = {
      */
     authorizeCallbackForWebsite: function (req, res, next) {
         var code = req.query.code;
+
+        console.log(code)
         clientForWeb.getAccessToken(code, function (err, result) {
-            console.log("当前扫码登录数据" + result)
+            console.log(result)
+            if (err)
+                console.log(err)
             var unionid = result.data.unionid;
             var openid = result.data.openid;
             userModel.find({unionid: unionid}, function (err, user) {
@@ -104,16 +126,15 @@ module.exports = {
                             } else {
                                 console.log('User成功保存 ....');
                                 console.log("保存的用户结果为:" + result);
-                                res.redirect('/')
-                                // res.json(result);
+                                res.redirect('/?id=' + result._id)
                             }
                         });
                     })
                 }
                 else {
                     console.log('根据unionid查询，用户已经存在')
-                    res.redirect('/')
-                    // res.json(user);
+                    console.log(user)
+                    res.redirect('/?id＝' + user[0]._id);
                 }
             });
 
