@@ -21,6 +21,9 @@ var file = require('./routes/file')
 var qrcode = require('./routes/qrcode')
 var push = require('./routes/push')
 var app = express();
+var mongo_express = require('mongo-express/lib/middleware')
+var mongo_express_config = require('./configs/mongo_express_config')
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -34,13 +37,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use('/oauth', wechat);
 app.use('/qiniu', qiniu);
 app.use('/files', file);
 app.use('/comments', comment);
 app.use('/qrcodes', qrcode);
 app.use('/pushs', push);
-
+app.use('/mongo', mongo_express(mongo_express_config))
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

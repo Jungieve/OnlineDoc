@@ -51,7 +51,8 @@ module.exports = {
         userModel.findById(userid, function (err, userEntity) {
             if (err)
                 res.json({error: "no such user"})
-            res.json(userEntity);
+            else
+                res.json(userEntity);
         })
 
     },
@@ -84,7 +85,7 @@ module.exports = {
                             } else {
                                 console.log('User成功保存 ....');
                                 console.log("保存的用户结果为:" + result);
-                                res.json(result);
+                                res.redirect('/?id=' + result._id)
                             }
                         });
                     })
@@ -92,7 +93,7 @@ module.exports = {
                 }
                 else {
                     console.log('根据unionid查询，用户已经存在')
-                    res.json(user);
+                    res.redirect('/?id=' + user[0]._id);
                 }
             });
         })
@@ -105,7 +106,6 @@ module.exports = {
     authorizeCallbackForWebsite: function (req, res, next) {
         var code = req.query.code;
 
-        console.log(code)
         clientForWeb.getAccessToken(code, function (err, result) {
             console.log(result)
             if (err)
@@ -134,7 +134,7 @@ module.exports = {
                 else {
                     console.log('根据unionid查询，用户已经存在')
                     console.log(user)
-                    res.redirect('/?id＝' + user[0]._id);
+                    res.redirect('/?id=' + user[0]._id);
                 }
             });
 
