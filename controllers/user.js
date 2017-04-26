@@ -18,7 +18,9 @@ module.exports = {
         var userid = req.params.id;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', userid, {
+        dbHelper.pageQuery(pageIndex, pageSize, fileModel, '', {
+            userid: userid
+        }, {
             "create_at": 'desc'
         }, function (error, $page) {
             if (error)
