@@ -11,7 +11,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var cors = require('cors')
-var history = require('connect-history-api-fallback');
 
 
 var wechat = require('./routes/wechat')

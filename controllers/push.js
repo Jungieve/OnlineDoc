@@ -13,7 +13,7 @@ module.exports = {
             }
             var filelist = [];
             for (var key in msg) {
-                var valueInMsg = obj[key];
+                var valueInMsg = msg[key];
                 for (var valueInFileList in filelist) {
                     if (valueInMsg == valueInFileList) {
                        break;
@@ -21,8 +21,9 @@ module.exports = {
                 }
                 filelist.push(valueInMsg);
             }
+            console.log('推送的未读文件为' + filelist);
             socketConnection.setSocketEmit(userid, filelist);
-            console.log('推送的未读文件为' + msg);
+
         })
         res.json({"code": 0})
     },
@@ -32,8 +33,8 @@ module.exports = {
             if (err) {
                 console.log(err)
             }
-            socketConnection.setSocketEmit(userid, msg);
             console.log('推送的评论数量' + msg);
+            socketConnection.setSocketEmit(userid, msg);
         })
         res.json({"code": 0})
     }

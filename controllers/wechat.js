@@ -9,8 +9,9 @@ var webConfig = require('../configs/website.json')
 var domainConfig = require('../configs/domain.json')
 var client = new OAuth(wechatConfig.AppId, wechatConfig.AppSecret);
 var clientForWeb = new OAuth(webConfig.AppId, webConfig.AppSecret);
-var api = new WechatAPI(webConfig.AppId, webConfig.AppSecret);
+var api = new WechatAPI(wechatConfig.AppId, wechatConfig.AppSecret);
 var redisConnection = require('../helpers/redisConnection')
+var crypto = require('crypto')
 module.exports = {
     /**
      * 检查微信签名
@@ -109,7 +110,13 @@ module.exports = {
 
     },
 
-
+    createSignature: function (req,res,next) {
+        var rawText = req.body.rawText;
+        console.log("输入字符串"+rawText)
+        var shasum = crypto.createHash('sha1');
+        shasum.update(rawText);
+        res.json({signature: shasum.digest('hex')})
+    },
     /**
      * 认证授权的回调函数
      * @param req

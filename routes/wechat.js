@@ -34,4 +34,9 @@ router.get('/web/callback', oauthController.authorizeCallbackForWebsite);
  * 微信JSSDK ticket
  */
 router.get('/js/ticket', oauthController.getTicket);
+
+/**
+ * 微信JSSDK ticket
+ */
+router.post('/js/signature', oauthController.createSignature);
 module.exports = router;

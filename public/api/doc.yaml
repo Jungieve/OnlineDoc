@@ -227,13 +227,32 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/errorModel'
-  /oauth/wechat/userinfo:
+  /oauth/wechat/user:
     get:
       summary: 移动端微信授权认证
       produces:
         - application/json
       tags:
         - 微信模块
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: 当前转发页的index
+          type: string
+          format: string
+        - name: pdfUrl
+          in: query
+          required: false
+          description: 当前转发pdfUrl
+          type: string
+          format: string
+        - name: domain
+          in: query
+          required: false
+          description: 当前跳转的子域名
+          type: string
+          format: string
       responses:
         '302':
           description: 永久重定向到授权页，用户点击授权获取微信信息（不支持pc web调用，建议使用微信开发者工具）,官方文档:https://mp.weixin.qq.com/wiki/4/9ac2e7b1f1d22e9e57260f6553822520.html
@@ -255,6 +274,26 @@ paths:
           description: 永久重定向到扫码页面，重定向后可以直接获取二维码页面，官方文档:https://open.weixin.qq.com/cgi-bin/showdocument?action=dir_list&t=resource/res_list&verify=1&id=open1419316505&token=&lang=zh_CN
           schema:
              $ref: '#/definitions/wechatList'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+  /oauth/js/ticket:
+    get:
+      summary: 获取微信JS-SDK签名
+      produces:
+        - application/json
+      tags:
+        - 微信模块
+      responses:
+        '200':
+          description: 成功获取签名
+          schema:
+            type: object
+            properties:
+              ticket:
+                type: string
+                description: js-sdk签名ticket
         '500':
           description: unexpected error
           schema:
