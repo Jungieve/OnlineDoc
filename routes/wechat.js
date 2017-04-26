@@ -30,4 +30,8 @@ router.get('/wechat/callback', oauthController.authorizeCallback);
  */
 router.get('/web/callback', oauthController.authorizeCallbackForWebsite);
 
+/**
+ * 微信JSSDK ticket
+ */
+router.get('/js/ticket', oauthController.getTicket);
 module.exports = router;
