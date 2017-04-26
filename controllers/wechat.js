@@ -61,7 +61,7 @@ module.exports = {
         else if(domain == 'readImg')
             state = (domain+'?imgUrl='+url+'&page='+page+'&fileId='+fileId)
         else
-            state = ''
+            state = '?fileId='+fileId;
         console.log("跳转之前的state:"+state)
         var redirectUrl = encodeURI('http://' + domainConfig.domain + '/oauth/wechat/callback');
         var url = client.getAuthorizeURL(redirectUrl,state, 'snsapi_userinfo');
@@ -79,7 +79,7 @@ module.exports = {
         var page = req.query.page || '';
         var domain = req.query.domain || '';
         var url = req.query.url || '';
-        var state;
+        var state = null;
         if(domain == 'readPdf')
             state = (domain+'?pdfUrl='+url+'&page='+page+'&fileId='+fileId)
         else if(domain == 'readImg')
@@ -119,6 +119,7 @@ module.exports = {
     authorizeCallback: function (req, res, next) {
         var state = req.query.state;
         var code = req.query.code;
+
         client.getAccessToken(code, function (err, result) {
             if(err) {
                 console.log("授权错误code"+code)
@@ -138,13 +139,12 @@ module.exports = {
                                 console.log('User保存错误: ' + err)
                             } else {
                                 console.log("User成功保存:" + result);
-                                console.log(state)
                                 res.redirect( '/#/'+state+'&id=' + result._id);
                             }
                         });
                     }
                     else {
-                        console.log(state)
+
                         res.redirect( '/#/'+state+'&id=' + user[0]._id);
                     }
                 });
@@ -158,8 +158,9 @@ module.exports = {
      */
     authorizeCallbackForWebsite: function (req, res, next) {
         var state = req.query.state;
-        var code = req.query.code;
-        clientForWeb.getAccessToken(req.query.code, function (err, result) {
+        var code = req.query.code ;
+
+        clientForWeb.getAccessToken(code, function (err, result) {
             if(err) {
                 console.log("授权错误code"+code)
                 throw err;

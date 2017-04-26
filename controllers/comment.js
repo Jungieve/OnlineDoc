@@ -21,7 +21,6 @@ module.exports = {
         var comment = req.body.comment;
         userModel.findById(commenter, function (err, commenterEntity) {
             if (err || commenterEntity == null || commenterEntity == '') {
-                console.log('根据openid查询，评论用户不存在')
                 res.json({error: "评论用户不存在"})
             }
             else {
@@ -31,41 +30,20 @@ module.exports = {
                     index: index,
                     fileid: fileid,
                 });
-
                 fileModel.findById(fileid, function (err, fileEntity) {
-                    if (err)
-                        console.log(err)
-                    else if (fileEntity == null || fileEntity == '') {
-                        console.log("找不到文件")
+                    if (err || fileEntity == null || fileEntity == '')
                         res.json({error: "找不到对应的评论文件"})
-                    }
                     else {
-                        redisConnection.redisClient.sadd(fileEntity.userid.toString() + "files", fileEntity["_id"].toString()), function (err) {
-                            if (err)
-                                console.log(err)
-                        };
                         commentData.commentTo = fileEntity.userid;
                         commentData.save(function (err, commentEntity) {
-                            if (err) {
+                            if (err)
                                 console.log('评论保存错误: ' + err)
-                            } else {
-                                redisConnection.redisClient.sadd(fileEntity.userid.toString() + "comments", commentEntity._id.toString()), function (err) {
-                                    if (err)
-                                        console.log(err)
-                                };
-                                console.log("保存的评论成功，结果为:" + commentEntity);
-                                commentEntity.code = 0;
-                                res.json(commentEntity);
-                            }
+                            else
+                                redisConnection.redisClient.hmset(fileEntity.userid.toString() + "comments",commentEntity._id.toString(),fileEntity["_id"].toString());
+                            res.json(commentEntity).status(201);;
                         });
-
-
                     }
-
                 });
-
-                console.log("评论成功")
-                res.status(201);
             }
         });
     },
@@ -81,8 +59,7 @@ module.exports = {
         var index = req.params.index;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        console.log(pageIndex)
-        console.log(pageSize)
+
         dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'commenter',
             {
                 fileid: fileid,
@@ -127,7 +104,7 @@ module.exports = {
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
 
-        redisConnection.redisClient.smembers(userid + 'comments', function (err, commentList) {
+        redisConnection.redisClient.hkeys(userid + 'comments', function (err, commentList) {
             if (err) {
                 console.log(err)
                 throw err;
@@ -148,15 +125,9 @@ module.exports = {
     markUnviewedComment: function (req, res, next) {
         var commentId = req.params.id;
         commentModel.findById(commentId, function (err, CommentEntity) {
-            if (err)
-                console.log(err)
-
-            else if (err || CommentEntity == null) {
+            if (err || CommentEntity == null)
                 res.json({error: "找不到对应评论id"})
-            }
-
             else {
-                console.log("要清除标记的评论为:" + CommentEntity)
                 var userid = CommentEntity.commentTo;
                 redisConnection.redisClient.srem(userid + 'comments', commentId.toString(), function (err, result) {
                     if (err) {
@@ -164,31 +135,14 @@ module.exports = {
                     }
                     else {
                         if (result == 0)
-                            res.json({error: "该评论已经被标记已读"}).status(204)
+                            res.json({error: "该评论已经被标记未读"}).status(204)
                         else {
-                            console.log("删除对应的评论提醒" + commentId)
-                            // //检查是否还有其他对该文件的未读
-                            //
-                            // redisConnection.redisClient.srem(userid + 'files', userid.toString(), function (err, result) {
-                            //     if (err) {
-                            //         console.log(err)
-                            //     }
-                            //     else {
-                            //         if (result == 0)
-                            //             console.log("没有相关对应要删除的文件")
-                            //         else (result == 1)
-                            //             console.log("要删除的对应文件:" + userid)
-                            //     }
-                            //
-                            // })
                             res.json(CommentEntity)
                         }
                     }
                 })
             }
         })
-
-
     },
     /**
      * 查看某个用户对该用户发起的评论

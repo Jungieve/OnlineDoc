@@ -11,7 +11,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var cors = require('cors')
-
+var history = require('connect-history-api-fallback');
 
 
 var wechat = require('./routes/wechat')
@@ -45,6 +45,7 @@ app.use('/comments', comment);
 app.use('/qrcodes', qrcode);
 app.use('/pushs', push);
 app.use('/mongo', mongo_express(mongo_express_config))
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
