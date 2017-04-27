@@ -39,8 +39,12 @@ module.exports = {
                             if (err)
                                 console.log('评论保存错误: ' + err)
                             else
-                                redisConnection.redisClient.hmset(fileEntity.userid.toString() + "comments",commentEntity._id.toString(),fileEntity["_id"].toString());
-                            res.json(commentEntity).status(201);;
+                                redisConnection.redisClient.hset(fileEntity.userid.toString() + "comments", commentEntity._id.toString(), fileEntity["_id"].toString(), function (err, result) {
+                                    if (err)
+                                        console.log(err)
+                                    else console.log(result)
+                                });
+                            res.json(commentEntity).status(201);
                         });
                     }
                 });

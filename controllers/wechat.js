@@ -30,13 +30,13 @@ module.exports = {
      * @param res
      * @param next
      */
-    getTicket: function(req,res,next){
-        redisConnection.redisClient.get('ticket',function(err, reply) {
-            if(reply == null || reply == ''){
-                api.getTicket(function(err,result) {
-                    if(err)
+    getTicket: function (req, res, next) {
+        redisConnection.redisClient.get('ticket', function (err, reply) {
+            if (reply == null || reply == '') {
+                api.getTicket(function (err, result) {
+                    if (err)
                         res.json({error: "获取ticket错误"})
-                    redisConnection.redisClient.set('ticket',result.ticket,  'EX',7200)
+                    redisConnection.redisClient.set('ticket', result.ticket, 'EX', 7200)
                     res.json(result)
                 })
             }
@@ -57,15 +57,15 @@ module.exports = {
         var url = req.query.url || '';
         console.log(url)
         var state;
-        if(domain == 'readPdf')
-            state = (domain+'?pdfUrl='+url+'&page='+page+'&fileId='+fileId)
-        else if(domain == 'readImg')
-            state = (domain+'?imgUrl='+url+'&page='+page+'&fileId='+fileId)
+        if (domain == 'readPdf')
+            state = (domain + '?pdfUrl=' + url + '&page=' + page + '&fileId=' + fileId)
+        else if (domain == 'readImg')
+            state = (domain + '?imgUrl=' + url + '&page=' + page + '&fileId=' + fileId)
         else
-            state = '?fileId='+fileId;
+            state = '?fileId=' + fileId;
 
         var redirectUrl = encodeURI('http://' + domainConfig.domain + '/oauth/wechat/callback');
-        var url = client.getAuthorizeURL(redirectUrl,state, 'snsapi_userinfo');
+        var url = client.getAuthorizeURL(redirectUrl, state, 'snsapi_userinfo');
         console.log("跳转之前的url:" + url)
         res.redirect(url)
     },
@@ -82,12 +82,12 @@ module.exports = {
         var domain = req.query.domain || '';
         var url = req.query.url || '';
         var state = null;
-        if(domain == 'readPdf')
-            state = (domain+'?pdfUrl='+url+'&page='+page+'&fileId='+fileId)
-        else if(domain == 'readImg')
-            state = (domain+'?imgUrl='+url+'&page='+page+'&fileId='+fileId)
+        if (domain == 'readPdf')
+            state = (domain + '?pdfUrl=' + url + '&page=' + page + '&fileId=' + fileId)
+        else if (domain == 'readImg')
+            state = (domain + '?imgUrl=' + url + '&page=' + page + '&fileId=' + fileId)
         else
-            state = '?fileId='+fileId;
+            state = '?fileId=' + fileId;
         var redirectUrl = encodeURI('http://' + domainConfig.domain + '/oauth/web/callback');
         var url = clientForWeb.getAuthorizeURLForWebsite(redirectUrl, encodeURI(state), 'snsapi_login');
         console.log("跳转之前的地址" + url)
@@ -111,9 +111,9 @@ module.exports = {
 
     },
 
-    createSignature: function (req,res,next) {
+    createSignature: function (req, res, next) {
         var rawText = req.body.rawText;
-        console.log("输入字符串"+rawText)
+        console.log("输入字符串" + rawText)
         var shasum = crypto.createHash('sha1');
         shasum.update(rawText);
         res.json({signature: shasum.digest('hex')})
@@ -128,37 +128,32 @@ module.exports = {
         var state = req.query.state;
         var code = req.query.code;
 
-        client.getAccessToken(code, function (err, result) {
-            if(err) {
-                console.log("授权错误code"+code)
+        client.getUserByCode(code, function (err, result) {
+            if (err) {
+                console.log("授权错误code" + code)
                 throw err;
             }
-            var unionid = result.data.unionid;
-            var openid = result.data.openid;
-            client.getUser({openid:openid}, function (err, result) {
-                if(err)
-                    throw err;
-                userModel.find({unionid: unionid}, function (err, user) {
-                    if (err || user == null || user == '') {
-                        console.log('用户不存在')
-                        var oauth_user = new userModel(result);
-                        oauth_user.save(function (err, result) {
-                            if (err) {
-                                console.log('User保存错误: ' + err)
-                            } else {
-                                console.log("User成功保存:" + result);
-                                var url = '/#/' + state + '&id=' + result._id;
-                                console.log("跳转之后的url" + url)
-                                res.redirect(url);
-                            }
-                        });
-                    }
-                    else {
-                        var url = '/#/' + state + '&id=' + user[0]._id;
-                        console.log("跳转之后的url" + url)
-                        res.redirect(url);
-                    }
-                });
+            var unionid = result.unionid;
+            userModel.find({unionid: unionid}, function (err, user) {
+                if (err || user == null || user == '') {
+                    console.log('用户不存在')
+                    var oauth_user = new userModel(result);
+                    oauth_user.save(function (err, result) {
+                        if (err) {
+                            console.log('User保存错误: ' + err)
+                        } else {
+                            console.log("User成功保存:" + result);
+                            var url = '/#/' + state + '&id=' + result._id;
+                            console.log("跳转之后的url" + url)
+                            res.redirect(url);
+                        }
+                    });
+                }
+                else {
+                    var url = '/#/' + state + '&id=' + user[0]._id;
+                    console.log("跳转之后的url" + url)
+                    res.redirect(url);
+                }
             });
         });
     }, /**
@@ -169,18 +164,14 @@ module.exports = {
      */
     authorizeCallbackForWebsite: function (req, res, next) {
         var state = req.query.state;
-        var code = req.query.code ;
+        var code = req.query.code;
 
-        clientForWeb.getAccessToken(code, function (err, result) {
-            if(err) {
-                console.log("授权错误code"+code)
-                throw err;
-            }
-            var unionid = result.data.unionid;
-            var openid = result.data.openid;
-            clientForWeb.getUser({openid:openid}, function (err, result) {
-                if(err)
+        clientForWeb.getUserByCode(code, function (err, result) {
+                if (err) {
+                    console.log("授权错误code" + code)
                     throw err;
+                }
+                var unionid = result.unionid;
                 userModel.find({unionid: unionid}, function (err, user) {
                     if (err || user == null || user == '') {
                         console.log('用户不存在')
@@ -190,16 +181,16 @@ module.exports = {
                                 console.log('User保存错误: ' + err)
                             } else {
                                 console.log("User成功保存:" + result);
-                                res.redirect( '/#/'+state+'&id=' + result._id);
+                                res.redirect('/#/' + state + '&id=' + result._id);
                             }
                         });
                     }
                     else {
-                        res.redirect( '/#/'+state+'&id=' + user[0]._id);
+                        res.redirect('/#/' + state + '&id=' + user[0]._id);
                     }
                 });
-            });
-        })
+            }
+        )
     }
 
 }

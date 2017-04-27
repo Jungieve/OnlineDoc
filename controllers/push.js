@@ -12,15 +12,19 @@ module.exports = {
                 console.log(err)
             }
             var filelist = [];
+
             for (var key in msg) {
                 var valueInMsg = msg[key];
+                var flag = true;
                 for (var valueInFileList in filelist) {
                     if (valueInMsg == valueInFileList) {
-                       break;
+                        flag = false;
                     }
                 }
-                filelist.push(valueInMsg);
+                if (flag == true)
+                    filelist.push(valueInMsg);
             }
+            console.log(filelist)
             console.log('推送的未读文件为' + filelist);
             socketConnection.setSocketEmit(userid, filelist);
 

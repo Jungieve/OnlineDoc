@@ -94,6 +94,7 @@ module.exports = {
                     notifyURL: domainConfig.domain + "/qiniu/persistent/file"
                 }
                 qiniu.fop.pfop(bucket, fileEntity.key, fops, opts, function (err, ret) {
+                    console.log(ret)
                     if (err) {
                         res.json(err)
                     }
@@ -113,10 +114,12 @@ module.exports = {
      * @param next
      */
     persistentFileCallback: function (req, res, next) {
+
         var items = req.body.items;
         var code = items[0].code;
         var pdfKey = items[0].key;
         query = {key: req.body.inputKey};
+
         switch (code) {
             // 成功
             case 0: {
