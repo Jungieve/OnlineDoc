@@ -155,37 +155,6 @@ module.exports = {
             }
 
         }
-
-
-        if (code = 0) {
-            fileModel.findOneAndUpdate(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, fileEntity) {
-                if (err)
-                    console.log(err)
-                else {
-                    console.log("转成pdf回调结果为" + fileEntity)
-                    var data = {
-                        code: code,
-                        fileId: fileEntity._id,
-                        userID: fileEntity.userid,
-                        pdfKey: pdfKey,
-                        fileKey: fileEntity.key
-                    }
-                    console.log("pdfKey" + pdfKey)
-                    redisConnection.redisClient.hset(fileEntity._id.toString() + "qiniu", code)
-                    res.json(fileEntity).status(200);
-
-                }
-            })
-        }
-        else {
-            fileModel.findOneAndRemove(query).exec(function (err, fileEntity) {
-                CommentModel.remove(fileEntity.comments);
-                console.log("删除的结果为" + fileEntity)
-                redisConnection.redisClient.set(fileEntity._id.toString() + "qiniu", code)
-                res.json(fileEntity).status(204);
-
-            })
-        }
     }
 }
 
