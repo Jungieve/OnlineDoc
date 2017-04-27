@@ -7,6 +7,8 @@ router.get('/subscriber/:id/unviewed/files', pushController.emitUnviewedFiles);
 
 
 //推送所有新评论数量
-router.get('/subscriber/:id/unviewed/comments/count', pushController.emitUnviewedCommentsNumber);
+router.get('/subscriber/:id/comments/count', pushController.emitUnviewedCommentsNumber);
 
+//推送所有新的持久化
+router.get('/subscriber/:id/persistent/files', pushController.emitPersistentResult);
 module.exports = router;

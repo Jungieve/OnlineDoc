@@ -22,8 +22,5 @@ router.put('/persistent/file', qiniuController.persistentFile);
  */
 router.post('/persistent/file', qiniuController.persistentFileCallback);
 
-/**
- * 七牛回调方法给客户端轮询
- */
-router.get('/persistent/file', qiniuController.checkPersistentResult);
+
 module.exports = router;

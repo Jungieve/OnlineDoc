@@ -550,6 +550,30 @@ paths:
 
             }
 
+  /pushs/subscriber/{:id}/comments/count:
+    get:
+      summary: 推送评论数
+      produces:
+        - application/json
+      tags:
+        - 推送模块
+      parameters:
+        - name: :id
+          in: path
+          required: true
+          description: 用户id
+          type: string
+          format: string
+      responses:
+        '200':
+          description: 用户未读的评论数
+          schema:
+             $ref: '#/definitions/wechatList'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
   /pushs/subscriber/{:id}/unviewed/files:
     get:
       summary: 推送未读文件列表
@@ -569,6 +593,30 @@ paths:
           description: 用户未读的文件列表（id列表）
           schema:
              $ref: '#/definitions/wechatList'
+        '500':
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+
+  /pushs/subscriber/{:id}/persistent/files:
+    get:
+      description: 推送七牛持久化情况,以一个key:value形式推送，其中key为文件的id,valu代表七牛持久化code;0表示成功，1表示等待处理，2表示正在处理，3表示处理失败，4表示回调失败。
+      produces:
+        - application/json
+      tags:
+        - 推送模块
+      parameters:
+        - name: :id
+          in: path
+          required: true
+          description: 用户id
+          type: string
+          format: string
+      responses:
+        '200':
+          description: 用户持久化文件列表（id列表）
+          schema:
+             $ref: '#/definitions/fileListByPage'
         '500':
           description: unexpected error
           schema:

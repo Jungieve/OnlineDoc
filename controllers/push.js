@@ -37,6 +37,17 @@ module.exports = {
             socketConnection.setSocketEmit(userid, msg);
         })
         res.json({"code": 0})
+    },
+    emitPersistentResult: function (req, res, next) {
+        var userid = req.query.id;
+        redisConnection.redisClient.hgetall(userid + "qiniu", function (err, body) {
+            if (err) {
+                console.log(err);
+            }
+            socketConnection.setSocketEmit(userid, body);
+            res.json({code: 0});
+        });
+
     }
 
 }

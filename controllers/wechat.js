@@ -63,9 +63,10 @@ module.exports = {
             state = (domain+'?imgUrl='+url+'&page='+page+'&fileId='+fileId)
         else
             state = '?fileId='+fileId;
-        console.log("跳转之前的state:"+state)
+
         var redirectUrl = encodeURI('http://' + domainConfig.domain + '/oauth/wechat/callback');
         var url = client.getAuthorizeURL(redirectUrl,state, 'snsapi_userinfo');
+        console.log("跳转之前的url:" + url)
         res.redirect(url)
     },
 
@@ -87,9 +88,9 @@ module.exports = {
             state = (domain+'?imgUrl='+url+'&page='+page+'&fileId='+fileId)
         else
             state = '?fileId='+fileId;
-        console.log("跳转之前的state:"+state)
         var redirectUrl = encodeURI('http://' + domainConfig.domain + '/oauth/web/callback');
         var url = clientForWeb.getAuthorizeURLForWebsite(redirectUrl, encodeURI(state), 'snsapi_login');
+        console.log("跳转之前的地址" + url)
         res.redirect(url)
     },
 
@@ -146,13 +147,16 @@ module.exports = {
                                 console.log('User保存错误: ' + err)
                             } else {
                                 console.log("User成功保存:" + result);
-                                res.redirect( '/#/'+state+'&id=' + result._id);
+                                var url = '/#/' + state + '&id=' + result._id;
+                                console.log("跳转之后的url" + url)
+                                res.redirect(url);
                             }
                         });
                     }
                     else {
-
-                        res.redirect( '/#/'+state+'&id=' + user[0]._id);
+                        var url = '/#/' + state + '&id=' + user[0]._id;
+                        console.log("跳转之后的url" + url)
+                        res.redirect(url);
                     }
                 });
             });

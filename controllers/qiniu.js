@@ -117,7 +117,47 @@ module.exports = {
         var code = items[0].code;
         var pdfKey = items[0].key;
         query = {key: req.body.inputKey};
-        if (code == 0) {
+        switch (code) {
+            // 成功
+            case 0: {
+                fileModel.findOneAndUpdate(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, fileEntity) {
+                    if (err)
+                        console.log(err)
+                    redisConnection.redisClient.hset(fileEntity.userid.toString() + "qiniu", fileEntity._id.toString(), code)
+                    console.log("转成pdf回调结果为" + fileEntity)
+                    res.status(201);
+
+                })
+                break;
+            }
+            // 3处理失败 4回调失败
+            case 3:
+            case 4: {
+                fileModel.findOneAndRemove(query).exec(function (err, fileEntity) {
+                    if (err)
+                        console.log(err)
+                    redisConnection.redisClient.hset(fileEntity.userid.toString() + "qiniu", fileEntity._id.toString(), code)
+                    CommentModel.remove(fileEntity.comments);
+                    console.log("删除的结果为" + fileEntity)
+                    res.status(204);
+
+                })
+                break;
+            }
+            // 1等待处理 2正在处理
+            default: {
+                fileModel.findOne(query).exec(function (err, fileEntity) {
+                    if (err)
+                        console.log(err)
+                    redisConnection.redisClient.hset(fileEntity.userid.toString() + "qiniu", fileEntity._id.toString(), code)
+                    res.status(200);
+                })
+            }
+
+        }
+
+
+        if (code = 0) {
             fileModel.findOneAndUpdate(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, fileEntity) {
                 if (err)
                     console.log(err)
@@ -131,7 +171,7 @@ module.exports = {
                         fileKey: fileEntity.key
                     }
                     console.log("pdfKey" + pdfKey)
-                    redisConnection.redisClient.hmset(fileEntity._id.toString(), data)
+                    redisConnection.redisClient.hset(fileEntity._id.toString() + "qiniu", code)
                     res.json(fileEntity).status(200);
 
                 }
@@ -139,32 +179,13 @@ module.exports = {
         }
         else {
             fileModel.findOneAndRemove(query).exec(function (err, fileEntity) {
-                CommentModel.remove(fileEntity.comments, function (err) {
-                    if (err)
-                        console.log(err)
-                })
-                if (err) {
-                    res.json(err);
-                }
+                CommentModel.remove(fileEntity.comments);
+                console.log("删除的结果为" + fileEntity)
+                redisConnection.redisClient.set(fileEntity._id.toString() + "qiniu", code)
+                res.json(fileEntity).status(204);
 
-                else {
-                    console.log("删除的结果为" + fileEntity)
-                    redisConnection.redisClient.hmset(fileEntity._id.toString(), {code: 3})
-                    res.json(fileEntity).status(204);
-                }
             })
         }
-    },
-    checkPersistentResult: function (req, res, next) {
-        var fileid = req.query.id;
-        redisConnection.redisClient.hgetall(fileid, function (err, body) {
-            if (err) {
-                console.log(err)
-                throw err
-            }
-            res.json(body);
-        });
-
     }
 }
 
