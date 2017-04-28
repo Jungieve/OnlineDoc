@@ -123,6 +123,7 @@ module.exports = {
         switch (code) {
             // 成功
             case 0: {
+                console.log("七牛code:" + code)
                 fileModel.findOneAndUpdate(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, fileEntity) {
                     if (err)
                         console.log(err)
@@ -136,6 +137,7 @@ module.exports = {
             // 3处理失败 4回调失败
             case 3:
             case 4: {
+                console.log("七牛code:" + code)
                 fileModel.findOneAndRemove(query).exec(function (err, fileEntity) {
                     if (err)
                         console.log(err)
@@ -149,12 +151,14 @@ module.exports = {
             }
             // 1等待处理 2正在处理
             default: {
+                console.log("七牛code:" + code)
                 fileModel.findOne(query).exec(function (err, fileEntity) {
                     if (err)
                         console.log(err)
                     redisConnection.redisClient.hset(fileEntity.userid.toString() + "qiniu", fileEntity._id.toString(), code)
                     res.status(200);
                 })
+                break;
             }
 
         }
