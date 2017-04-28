@@ -24,7 +24,11 @@ module.exports = {
      * @param next
      */
     getToken: function (req, res, next) {
+        var fileType = req.query.type;
         var putPolicy = new qiniu.rs.PutPolicy(bucket);
+        putPolicy.persistentNotifyUrl = domainConfig.domain + "/qiniu/persistent/file";
+        putPolicy.persistentOps ="yifangyun_preview/v2/ext=" + fileType;
+        putPolicy.persistentPipeline = 'xunzhu_pipeline';
         putPolicy.callbackUrl = 'http://' + domainConfig.domain + '/qiniu/upload/callback';
         putPolicy.callbackBody = 'filename=$(fname)&filesize=$(fsize)&fileType=$(mimeType)' +
             '&bucket=$(bucket)&key=$(key)' +
@@ -39,6 +43,7 @@ module.exports = {
      */
     uploadCallback: function (req, res, next) {
         var file = new fileModel(req.body);
+        console.log(req.body)
         fileModel.find({key: req.body.key}, function (err, fileEntity) {
             if (err) {
                 console.log(err)
@@ -75,93 +80,40 @@ module.exports = {
     },
 
     /**
-     * 七牛持久化文件流程
-     * @param req
-     * @param res
-     * @param next
-     */
-    persistentFile: function (req, res, next) {
-        var fileid = req.body.id;
-        var fileType = req.body.type;
-        var fops = "yifangyun_preview/v2/ext=" + fileType;
-        fileModel.findById(fileid, function (err, fileEntity) {
-            if (err)
-                res.json(err)
-            else if (fileEntity == null || fileEntity == '')
-                res.json({error: "no such file"})
-            else {
-                var opts = {
-                    notifyURL: domainConfig.domain + "/qiniu/persistent/file"
-                }
-                qiniu.fop.pfop(bucket, fileEntity.key, fops, opts, function (err, ret) {
-                    console.log(ret)
-                    if (err) {
-                        res.json(err)
-                    }
-                    if (ret == null) {
-                        res.json({error: "error"});
-                    }
-                    else res.end();
-                })
-            }
-        })
-    },
-
-    /**
      * 七牛持久化回调函数
      * @param req
      * @param res
      * @param next
      */
     persistentFileCallback: function (req, res, next) {
-
         var items = req.body.items;
         var code = items[0].code;
         var pdfKey = items[0].key;
         query = {key: req.body.inputKey};
-
-        switch (code) {
-            // 成功
-            case 0: {
-                console.log("七牛code:" + code)
-                fileModel.findOneAndUpdate(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, fileEntity) {
-                    if (err)
-                        console.log(err)
-                    redisConnection.redisClient.hset(fileEntity.userid.toString() + "qiniu", fileEntity._id.toString(), code)
-                    console.log("转成pdf回调结果为" + fileEntity)
+        console.log("code" + code + ' query:' + query.toString())
+        fileModel.findOne(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, fileEntity) {
+            if (err || fileEntity == null) {
+                console.log('找不到回调的目标用户' + err);
+            }
+            redisConnection.redisClient.hset(fileEntity.userid.toString() + "qiniu", fileEntity._id.toString(), code);
+            switch (code) {
+                case 0: {
+                    fileEntity.pdfKey = pdfKey;
+                    fileEntity.save();
+                    console.log("成功转换,转成pdf回调结果为" + fileEntity)
                     res.status(201);
-
-                })
-                break;
-            }
-            // 3处理失败 4回调失败
-            case 3:
-            case 4: {
-                console.log("七牛code:" + code)
-                fileModel.findOneAndRemove(query).exec(function (err, fileEntity) {
-                    if (err)
-                        console.log(err)
-                    redisConnection.redisClient.hset(fileEntity.userid.toString() + "qiniu", fileEntity._id.toString(), code)
-                    CommentModel.remove(fileEntity.comments);
-                    console.log("删除的结果为" + fileEntity)
+                    break;
+                }
+                case 3:
+                case 4: {
+                    console.log("七牛失败code:" + code + "它的query是" + query.toString());
+                    fileEntity.remove();
                     res.status(204);
-
-                })
-                break;
+                }
+                default:
+                    res.status(202);
             }
-            // 1等待处理 2正在处理
-            default: {
-                console.log("七牛code:" + code)
-                fileModel.findOne(query).exec(function (err, fileEntity) {
-                    if (err)
-                        console.log(err)
-                    redisConnection.redisClient.hset(fileEntity.userid.toString() + "qiniu", fileEntity._id.toString(), code)
-                    res.status(200);
-                })
-                break;
-            }
-
-        }
+        })
     }
 }
 
