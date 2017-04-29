@@ -6,7 +6,6 @@ var domainConfig = require('../configs/domain.json');
 var qiniuConfig = require('../configs/qiniu.json');
 var fileModel = mongoose.model('File');
 var userModel = mongoose.model('User');
-var CommentModel = mongoose.model('Comment');
 var redisConnection = require('../helpers/redisConnection')
 var request = require('request')
 //需要填写你的 Access Key 和 Secret Key
@@ -24,11 +23,8 @@ module.exports = {
      * @param next
      */
     getToken: function (req, res, next) {
-        var fileType = req.query.type;
+        // var fileType = req.query.type;
         var putPolicy = new qiniu.rs.PutPolicy(bucket);
-        putPolicy.persistentNotifyUrl = domainConfig.domain + "/qiniu/persistent/file";
-        putPolicy.persistentOps ="yifangyun_preview/v2/ext=" + fileType;
-        putPolicy.persistentPipeline = 'xunzhu_pipeline';
         putPolicy.callbackUrl = 'http://' + domainConfig.domain + '/qiniu/upload/callback';
         putPolicy.callbackBody = 'filename=$(fname)&filesize=$(fsize)&fileType=$(mimeType)' +
             '&bucket=$(bucket)&key=$(key)' +
@@ -78,7 +74,38 @@ module.exports = {
         })
 
     },
-
+    /**
+     * 七牛持久化文件流程
+     * @param req
+     * @param res
+     * @param next
+     */
+    persistentFile: function (req, res, next) {
+        var fileid = req.body.id;
+        var fileType = req.body.type;
+        var fops = "yifangyun_preview/v2/ext=" + fileType;
+        fileModel.findById(fileid, function (err, fileEntity) {
+            if (err)
+                res.json(err)
+            else if (fileEntity == null || fileEntity == '')
+                res.json({error: "no such file"})
+            else {
+                var opts = {
+                    notifyURL: domainConfig.domain + "/qiniu/persistent/file",
+                    pipeline: 'xunzhu_pipeline'
+                }
+                qiniu.fop.pfop(bucket, fileEntity.key, fops, opts, function (err, ret) {
+                    if (err) {
+                        res.json(err)
+                    }
+                    if (ret == null) {
+                        res.json({error: "error"});
+                    }
+                    else res.end();
+                })
+            }
+        })
+    },
     /**
      * 七牛持久化回调函数
      * @param req
@@ -90,11 +117,11 @@ module.exports = {
         var code = items[0].code;
         var pdfKey = items[0].key;
         query = {key: req.body.inputKey};
-        console.log("code" + code + ' query:' + query.toString())
-        fileModel.findOne(query, {$set: {code: code, pdfKey: pdfKey}}, function (err, fileEntity) {
+        fileModel.findOne(query, function (err, fileEntity) {
             if (err || fileEntity == null) {
                 console.log('找不到回调的目标用户' + err);
             }
+            console.log(query)
             redisConnection.redisClient.hset(fileEntity.userid.toString() + "qiniu", fileEntity._id.toString(), code);
             switch (code) {
                 case 0: {
@@ -107,7 +134,7 @@ module.exports = {
                 case 3:
                 case 4: {
                     console.log("七牛失败code:" + code + "它的query是" + query.toString());
-                    fileEntity.remove();
+                    // fileEntity.remove();
                     res.status(204);
                 }
                 default:
