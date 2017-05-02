@@ -18,7 +18,6 @@ var comment = require('./routes/comment')
 var qiniu = require('./routes/qiniu')
 var file = require('./routes/file')
 var qrcode = require('./routes/qrcode')
-var push = require('./routes/push')
 var app = express();
 var mongo_express = require('mongo-express/lib/middleware')
 var mongo_express_config = require('./configs/mongo_express_config')
@@ -42,7 +41,6 @@ app.use('/qiniu', qiniu);
 app.use('/files', file);
 app.use('/comments', comment);
 app.use('/qrcodes', qrcode);
-app.use('/pushs', push);
 app.use('/mongo', mongo_express(mongo_express_config))
 
 

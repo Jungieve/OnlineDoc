@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <!--socket.io-->
+    <script type="text/javascript" src="http://cdn.staticfile.org/socket.io/1.3.7/socket.io.js"></script>
+</head>
+<body>
+<h1><%= title %></h1>
+
+</body>
+
+<script type="text/javascript">
+    var initSocket = io("http://www.filescloud.cn/");
+    var commentSocket = io("http://www.filescloud.cn/comment");
+    var fileSocket = io("http://www.filescloud.cn/file");
+    //监听未读评论数事件，输出一个object如:{commentCount:13}
+    initSocket.emit('unmark', 评论id);
+    commentSocket.on('58fde74d6e881b2661c8eff4', function (data) {
+        alert(data)
+    })
+
+    //一个测试的id:58fde74d6e881b2661c8eff4
+    //监听未读文件事件，输出一个array如:[文件id,文件id...]
+    fileSocket.on('58fde74d6e881b2661c8eff4', function (data) {
+        alert(data)
+    })
+
+</script>
+</html>

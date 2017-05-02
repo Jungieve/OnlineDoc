@@ -5,7 +5,7 @@ var redisConnection = require('../helpers/redisConnection')
 var userModel = mongoose.model('User');
 var fileModel = mongoose.model('File');
 var commentModel = mongoose.model('Comment')
-
+var socketConnection = require('../helpers/socketConnection');
 
 module.exports = {
     /**
@@ -42,7 +42,8 @@ module.exports = {
                                 redisConnection.redisClient.hset(fileEntity.userid.toString() + "comments", commentEntity._id.toString(), fileEntity["_id"].toString(), function (err, result) {
                                     if (err)
                                         console.log(err)
-                                    else console.log(result)
+                                    socketConnection.setCommentsEmit(fileEntity.userid.toString());
+                                    socketConnection.setFileEmit(fileEntity.userid.toString());
                                 });
                             res.json(commentEntity).status(201);
                         });
@@ -63,7 +64,6 @@ module.exports = {
         var index = req.params.index;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-
         dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'commenter',
             {
                 fileid: fileid,
@@ -87,11 +87,17 @@ module.exports = {
      */
     getUserCommentListByPage: function (req, res, next) {
         var userid = req.params.id;
-        var pageIndex = req.query.pageIndex;
-        var pageSize = parseInt(req.query.pageSize);
+        var pageIndex = req.body.pageIndex;
+        var pageSize = parseInt(req.body.pageSize);
+        var begindate = req.body.begindate || '1970-01-01';
+        var enddate = req.body.enddate || '2038-01-01';
         dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'commenter fileid',
             {
-                commentTo: userid
+                commentTo: userid,
+                create_at: {
+                    "$gte": new Date(begindate),
+                    "$lte": new Date(new Date(enddate).getTime() + 24 * 60 * 60 * 1000)
+                }
             }, {
                 "create_at": 'desc'
             }, function (error, $page) {
@@ -105,16 +111,24 @@ module.exports = {
 
     getUnviewedCommentList: function (req, res, next) {
         var userid = req.params.id;
-        var pageIndex = req.query.pageIndex;
-        var pageSize = parseInt(req.query.pageSize);
-
+        var pageIndex = req.body.pageIndex;
+        var pageSize = parseInt(req.body.pageSize);
+        var begindate = req.body.begindate || '1970-01-01';
+        var enddate = req.body.enddate || '2038-01-01';
         redisConnection.redisClient.hkeys(userid + 'comments', function (err, commentList) {
             if (err) {
                 console.log(err)
                 throw err;
             }
-            console.log("commentList" + commentList)
-            dbHelper.pageQuery(pageIndex, pageSize, commentModel, '', {_id: commentList}, {
+            console.log("获取的未读评论" + commentList)
+            dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'commenter fileid',
+                {
+                    _id: commentList,
+                    create_at: {
+                        "$gte": new Date(begindate),
+                        "$lte": new Date(new Date(enddate).getTime() + 24 * 60 * 60 * 1000)
+                    }
+                }, {
                     "create_at": 'desc'
                 }
                 , function (error, $page) {
@@ -127,13 +141,13 @@ module.exports = {
     },
 
     markUnviewedComment: function (req, res, next) {
-        var commentId = req.params.id;
+        /*var commentId = req.params.id;
         commentModel.findById(commentId, function (err, CommentEntity) {
             if (err || CommentEntity == null)
                 res.json({error: "找不到对应评论id"})
             else {
                 var userid = CommentEntity.commentTo;
-                redisConnection.redisClient.srem(userid + 'comments', commentId.toString(), function (err, result) {
+         redisConnection.redisClient.hdel(userid.toString() + 'comments', commentId.toString(), function (err, result) {
                     if (err) {
                         console.log(err)
                     }
@@ -141,12 +155,14 @@ module.exports = {
                         if (result == 0)
                             res.json({error: "该评论已经被标记未读"}).status(204)
                         else {
+         socketConnection.setCommentsEmit(userid.toString());
+         socketConnection.setFileEmit(userid.toString());
                             res.json(CommentEntity)
                         }
                     }
                 })
             }
-        })
+         })*/
     },
     /**
      * 查看某个用户对该用户发起的评论
@@ -155,18 +171,14 @@ module.exports = {
      */
     getUserCommentListAtCertainCommenterByPage: function (req, res, next) {
         var userid = req.params.id;
-        var commenterid = req.params.commenterid;
-        var begindate = req.query.begindate || '1970-01-01';
-        var enddate = req.query.enddate || '2038-01-01';
+        var commenterid = req.query.commenterid;
         var pageIndex = req.query.pageIndex;
         var pageSize = parseInt(req.query.pageSize);
-        console.log(begindate)
-        console.log(enddate)
+
         dbHelper.pageQuery(pageIndex, pageSize, commentModel, 'commenter fileid',
             {
                 commenter: commenterid,
                 commentTo: userid,
-                create_at: {"$gte": new Date(begindate), "$lte": new Date(enddate)}
             }, {
                 "create_at": 'desc'
             }, function (error, $page) {

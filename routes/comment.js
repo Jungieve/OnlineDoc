@@ -8,13 +8,13 @@ router.post('/file/:id/:index/', commentController.insertNewCommentAtPageIndex);
 router.get('/file/:id/:index/list', commentController.getCommentListByPage);
 
 //分页获取某个用户所拥有的评论列表
-router.get('/user/:id/list', commentController.getUserCommentListByPage);
+router.post('/user/:id/list', commentController.getUserCommentListByPage);
 
 //分页获取某个用户所拥有的未读评论列表
-router.get('/user/:id/unviewed/list', commentController.getUnviewedCommentList);
+router.post('/user/:id/unviewed/list', commentController.getUnviewedCommentList);
 
 //分页获取某个用户下的单个评论人发起过的评论
-router.get('/user/:id/by/commenter/:commenterid/list', commentController.getUserCommentListAtCertainCommenterByPage);
+router.get('/user/:id/by/commenter/list', commentController.getUserCommentListAtCertainCommenterByPage);
 
 
 //标记某个评论为已读
