@@ -74,8 +74,16 @@ module.exports = {
             }, function (error, $page) {
                 if (error)
                     res.json(error)
-                else
+                else {
+                    if($page.results != null){
+                        var idArray = [];
+                        var results = $page.results;
+                        for(var i in results)
+                            idArray.push(results[i]._id);
+                        socketConnection.unmarkEmit(idArray);
+                    }
                     res.json($page)
+                }
             })
     },
     /**
@@ -103,8 +111,9 @@ module.exports = {
             }, function (error, $page) {
                 if (error)
                     res.json(error)
-                else
+                else {
                     res.json($page)
+                }
             })
 
     },
@@ -140,30 +149,6 @@ module.exports = {
         })
     },
 
-    markUnviewedComment: function (req, res, next) {
-        /*var commentId = req.params.id;
-        commentModel.findById(commentId, function (err, CommentEntity) {
-            if (err || CommentEntity == null)
-                res.json({error: "找不到对应评论id"})
-            else {
-                var userid = CommentEntity.commentTo;
-         redisConnection.redisClient.hdel(userid.toString() + 'comments', commentId.toString(), function (err, result) {
-                    if (err) {
-                        console.log(err)
-                    }
-                    else {
-                        if (result == 0)
-                            res.json({error: "该评论已经被标记未读"}).status(204)
-                        else {
-         socketConnection.setCommentsEmit(userid.toString());
-         socketConnection.setFileEmit(userid.toString());
-                            res.json(CommentEntity)
-                        }
-                    }
-                })
-            }
-         })*/
-    },
     /**
      * 查看某个用户对该用户发起的评论
      * @param id: 用户id

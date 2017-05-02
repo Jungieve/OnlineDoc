@@ -16,9 +16,7 @@ socketio.getSocketio = function (server) {
         socket.on('userid', function (userid) {
             console.log("获取客户端userid成功")
             socketio.setCommentsEmit(userid)
-            console.log('推送comment成功');
             socketio.setFileEmit(userid)
-            console.log('推送file成功');
         })
         socket.on('unmark', function (commentid) {
             console.log("清除标记")
@@ -32,6 +30,7 @@ socketio.getSocketio = function (server) {
         console.log('file命名空间连接成功');
     })
 };
+
 
 socketio.unmarkEmit = function (commentId) {
     commentModel.findById(commentId, function (err, CommentEntity) {
