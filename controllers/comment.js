@@ -42,8 +42,10 @@ module.exports = {
                                 redisConnection.redisClient.hset(fileEntity.userid.toString() + "comments", commentEntity._id.toString(), fileEntity["_id"].toString(), function (err, result) {
                                     if (err)
                                         console.log(err)
-                                    socketConnection.setCommentsEmit(fileEntity.userid.toString());
-                                    socketConnection.setFileEmit(fileEntity.userid.toString());
+                                    if (commenter != commentData.commentTo) {
+                                        socketConnection.setCommentsEmit(fileEntity.userid.toString());
+                                        socketConnection.setFileEmit(fileEntity.userid.toString());
+                                    }
                                 });
                             res.json(commentEntity).status(201);
                         });
@@ -75,13 +77,6 @@ module.exports = {
                 if (error)
                     res.json(error)
                 else {
-                    if($page.results != null){
-                        var idArray = [];
-                        var results = $page.results;
-                        for(var i in results)
-                            idArray.push(results[i]._id);
-                        socketConnection.unmarkEmit(idArray);
-                    }
                     res.json($page)
                 }
             })

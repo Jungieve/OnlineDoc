@@ -22,6 +22,10 @@ socketio.getSocketio = function (server) {
             console.log("清除标记")
             socketio.unmarkEmit(commentid);
         })
+        socket.on('unmarkFile', function (fileid, userid, index) {
+            console.log("清除文件标记")
+            socketio.unmarkEmitAtPage(fileid, userid, index);
+        })
     })
     commentSocket = io.of('/comment').on('connection', function () {
         console.log('comment命名空间连接成功');
@@ -30,6 +34,25 @@ socketio.getSocketio = function (server) {
         console.log('file命名空间连接成功');
     })
 };
+
+
+socketio.unmarkEmitAtPage = function (fileid, userid, index) {
+    commentModel.find({commentTo: userid, fileid: fileid, index: index}, ['id'], function (err, CommentListEntity) {
+        if (err || CommentListEntity == null)
+            console.log({error: "找不到对应的评论集合"})
+        var idList = [];
+        for (var i in CommentListEntity)
+            idList.push(CommentListEntity[i]._id);
+        redisConnection.redisClient.hdel(userid.toString() + 'comments', idList, function (err, result) {
+            if (err) {
+                console.log(err)
+            }
+            socketio.setCommentsEmit(userid.toString());
+            socketio.setFileEmit(userid.toString());
+
+        })
+    })
+}
 
 
 socketio.unmarkEmit = function (commentId) {

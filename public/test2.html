@@ -16,7 +16,7 @@
     var commentSocket = io("http://www.filescloud.cn/comment");
     var fileSocket = io("http://www.filescloud.cn/file");
     //监听未读评论数事件，输出一个object如:{commentCount:13}
-    initSocket.emit('unmark', 评论id);
+    initSocket.emit('unmarkFile', '5905c97e724e87592a9a3a12', '58fde74d6e881b2661c8eff4', 1);
     commentSocket.on('58fde74d6e881b2661c8eff4', function (data) {
         alert(data)
     })
